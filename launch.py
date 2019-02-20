@@ -35,7 +35,7 @@ import pytz
 
 HERE = os.path.dirname(os.path.realpath(__file__))
 
-AVAIL_DEVICES = set(['0', '1', '2', '3'])
+INSTALLED_DEVICES = set(['0', '1', '2', '3'])
 
 ERI_IMAGES = {
     'Python': {
@@ -74,16 +74,24 @@ def _error(msg):
     }
 
 
-def _update_avail_devices(client=None):
-    """update set of gpus available for use"""
-    global AVAIL_DEVICES
-    available_devices = set(['0', '1', '2', '3'])
+def _get_avail_devices(client=None, installed_devices=INSTALLED_DEVICES):
+    """query set of gpus available for use"""
+    available_devices = installed_devices.copy()
     client = client or docker.from_env()
     for c in client.containers.list():
         gpus = _env_lookup(c, 'NVIDIA_VISIBLE_DEVICES')
         if gpus:
             available_devices.difference_update(gpus.split(','))
-    AVAIL_DEVICES = available_devices
+    return available_devices
+
+
+def _calculate_uptime(t0):
+    t1 = datetime.datetime.now(tz=pytz.timezone('US/Eastern'))
+    td = t1 - t0
+    days, rem = divmod(td.total_seconds(), 86400)
+    hours, rem = divmod(rem, 3600)
+    minutes, seconds = divmod(rem, 60)
+    return days, hours, minutes, seconds
 
 
 def _running_images(client=None, ignore_other_images=False):
@@ -159,14 +167,9 @@ def active_eri_images(client=None, ignore_other_images=False):
 
         # uptime
         try:
-            t0 = dateutil.parser.parse(c.attrs['Created']).astimezone()
-            t1 = datetime.datetime.now(tz=pytz.timezone('US/Eastern'))
-            td = t1 - t0
-            days, rem = divmod(td.total_seconds(), 86400)
-            hours, rem = divmod(rem, 3600)
-            minutes, seconds = divmod(rem, 60)
+            created = dateutil.parser.parse(c.attrs['Created']).astimezone()
             d['uptime'] = "{0:.0f} Days {1:02.0f}:{2:02.0f}:{3:02.0f}"\
-                .format(days, hours, minutes, seconds)
+                .format(*_calculate_uptime(t0=created))
         except Exception as e:
             d['uptime'] = str(e)
 
@@ -192,11 +195,11 @@ def _validate_launch(num_gpus, client=None):
 
     """
     client = client or docker.from_env()
-
-    if num_gpus > len(AVAIL_DEVICES):
+    num_available_devices = len(_get_avail_devices(client))
+    if num_gpus > num_available_devices:
         return (
             False,
-            "only {} gpus available at this time".format(len(AVAIL_DEVICES))
+            "only {} gpus available at this time".format(num_available_devices)
         )
     else:
         return True, None
@@ -366,9 +369,8 @@ def launch(username, imagetype=None, jupyter_pwd=None, num_gpus=0, **kwargs):
         # see https://github.com/pytorch/pytorch/issues/2244
         # perhaps this should be a multiple of num_gpus?
         imagedict['shm_size'] = '8G'
-        gpu_ids = []
-        for i in range(num_gpus):
-            gpu_ids.append(AVAIL_DEVICES.pop())
+        available_devices = _get_avail_devices(client)
+        gpu_ids = [available_devices.pop() for i in range(num_gpus)]
         _update_environment(
             imagedict,
             'NVIDIA_VISIBLE_DEVICES',
@@ -401,13 +403,10 @@ def launch(username, imagetype=None, jupyter_pwd=None, num_gpus=0, **kwargs):
     for attr in ['id', 'name', 'status']:
         d[attr] = getattr(container, attr)
 
-    _update_avail_devices(client)
-
     return d
 
 
 def kill(docker_id):
-    global AVAIL_DEVICES
     try:
         client = docker.from_env()
         client.containers.get(docker_id).kill()
@@ -420,8 +419,6 @@ def kill(docker_id):
         d['error_details'] = str(e)
 
     d['docker_id'] = docker_id
-
-    _update_avail_devices(client)
 
     return d
 
@@ -447,6 +444,9 @@ def parse_args():
         " notebook services running in them)"
     )
     parser.add_argument("-p", "--jupyterpwd", help=jupyter_pwd)
+    
+    num_gpus = "number of gpus to be attached to container"
+    parser.add_argument("-g", "--numgpus", help=num_gpus, default=0)
 
     return parser.parse_args()
 
@@ -456,5 +456,6 @@ if __name__ == '__main__':
     launch(
         username=args.username,
         imagetype=args.imagetype,
-        jupyter_pwd=args.jupyterpwd
+        jupyter_pwd=args.jupyterpwd,
+	num_gpus=args.numgpus
     )
