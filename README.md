@@ -10,12 +10,12 @@ the launcher application is now served by apache and lives in the `/var/www` dir
 after committing/merging changes to the master branch on Github, you will have to pull those changes to the deployment directory and restart the apache service.
 
 1. ssh into the gpu machine.
-2. `cd /var/www/gpu_docker`
+2. `cd /var/www/gpu_launch_app`
 3. `git pull`
 4. `sudo service apache2 restart`
 
-the relevant apache2 virtual host config lives at `/etc/apache2/sites-enabled/gpu_docker.conf`
+the relevant apache2 virtual host config lives at `/etc/apache2/sites-available/gpu_launch_app.conf`
 
 you can view the error log by running `sudo less /var/log/apache2/error.log`
 
-CAUTION: other than running `git pull`, you should never directly edit the files located in `/var/www/gpu_docker`!
+CAUTION: other than running `git pull`, you should never directly edit the files located in `/var/www/gpu_launch_app`!
