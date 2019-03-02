@@ -119,8 +119,9 @@ def kill_session():
         category=FLASH_CLS['success']
     )
     entry = ActivityLog.query.filter_by(id=request.form["docker_id"]).first()
-    entry.stop()
-    db.session.commit()
+    if entry is not None:
+        entry.stop()
+        db.session.commit()
     return redirect(url_for('home'))
 
 
