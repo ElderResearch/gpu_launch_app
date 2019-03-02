@@ -1,11 +1,37 @@
+from datetime import datetime
 import hashlib
+import os
 
 from . import launch
 from flask import Flask, flash, redirect, render_template, request, url_for
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask('docker_launcher', template_folder='/var/www/gpu_launch_app/app/templates')
 app.secret_key = '\xc8d\x19E}\xa5g\xbbC\xbd\xe2\x17\x83\xfa!>\xead\x07p\xbd\x92\xce\x85'
 app.debug = True
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir,
+                                                                    'app.db')
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+
+class ActivityLog(db.Model):
+    id = db.Column(db.String(64), primary_key=True)
+    username = db.Column(db.String(32))
+    image_type = db.Column(db.String(8))
+    num_gpus = db.Column(db.Integer)
+    start_time = db.Column(db.DateTime, default=datetime.utcnow)
+    stop_time = db.Column(db.DateTime, nullable=True)
+
+    def __repr__(self):
+        return "<ActivityLog {}".format(self.id)
+
+    def stop(self):
+        self.stop_time = datetime.utcnow()
 
 HISTORY = []
 LAUNCHED_SESSIONS = []
@@ -51,6 +77,10 @@ def create_session():
         ),
         category=FLASH_CLS['success']
     )
+    entry = ActivityLog(id=resp['id'], username=resp['username'],
+                        image_type=resp['imagetype'], num_gpus=resp['num_gpus'])
+    db.session.add(entry)
+    db.session.commit()
     return redirect(url_for('home'))
 
 
@@ -88,8 +118,15 @@ def kill_session():
         ),
         category=FLASH_CLS['success']
     )
+    entry = ActivityLog.query.filter_by(id=request.form["docker_id"]).first()
+    entry.stop()
+    db.session.commit()
     return redirect(url_for('home'))
 
 
 if __name__ == '__main__':
+    try:
+        db.create_all()
+    except Exception as e:
+        pass
     app.run(debug=False, host="0.0.0.0")

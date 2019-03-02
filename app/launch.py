@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -395,6 +394,8 @@ def launch(username, imagetype=None, jupyter_pwd=None, num_gpus=0, **kwargs):
         'imagetype': imagetype,
         'jupyter_url': 'http://eri-gpu:{}/'.format(imagedict['ports'][8888]),
         'image': imagedict['image'],
+        'username': username,
+        'num_gpus': num_gpus,
     }
 
     if imagetype in R_IMAGES:
@@ -444,7 +445,7 @@ def parse_args():
         " notebook services running in them)"
     )
     parser.add_argument("-p", "--jupyterpwd", help=jupyter_pwd)
-    
+
     num_gpus = "number of gpus to be attached to container"
     parser.add_argument("-g", "--numgpus", help=num_gpus, default=0)
 
