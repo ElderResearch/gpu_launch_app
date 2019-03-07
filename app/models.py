@@ -1,4 +1,7 @@
-from launchapp import db
+#!/usr/bin/env python3
+
+from datetime import datetime
+from .extensions import db
 
 class ActivityLog(db.Model):
     id = db.Column(db.String(64), primary_key=True)
