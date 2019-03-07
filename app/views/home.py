@@ -1,25 +1,10 @@
-from datetime import datetime
 import hashlib
 import os
 
-from . import launch
-from flask import Flask, flash, redirect, render_template, request, url_for
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-
-basedir = os.path.abspath(os.path.dirname(__file__))
-
-app = Flask('docker_launcher', template_folder='/var/www/gpu_launch_app/app/templates')
-app.secret_key = '\xc8d\x19E}\xa5g\xbbC\xbd\xe2\x17\x83\xfa!>\xead\x07p\xbd\x92\xce\x85'
-app.debug = True
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir,
-                                                                    'app.db')
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-
-from .models import ActivityLog
-
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from .. import launch
+from ..extensions import db
+from ..models import ActivityLog
 
 HISTORY = []
 LAUNCHED_SESSIONS = []
@@ -28,9 +13,10 @@ FLASH_CLS = {
     'success': "alert alert-success",
 }
 
+home = Blueprint('home', __name__)
 
-@app.route('/', methods=['GET'])
-def home():
+@home.route('/', methods=['GET'])
+def index():
     launched_sessions = launch.active_eri_images(ignore_other_images=True)
 
     return render_template(
@@ -41,7 +27,7 @@ def home():
     )
 
 
-@app.route('/createSession', methods=['POST'])
+@home.route('/createSession', methods=['POST'])
 def create_session():
     resp = launch.launch(
         username=request.form['username'],
@@ -57,7 +43,7 @@ def create_session():
             message=resp.get('message', 'unhandled error'),
             category=FLASH_CLS['error']
         )
-        return redirect(url_for('home'))
+        return redirect(url_for('home.index'))
 
     flash(
         message="docker container {} created successfully".format(
@@ -69,10 +55,10 @@ def create_session():
                         image_type=resp['imagetype'], num_gpus=resp['num_gpus'])
     db.session.add(entry)
     db.session.commit()
-    return redirect(url_for('home'))
+    return redirect(url_for('home.index'))
 
 
-@app.route('/killSession', methods=['POST'])
+@home.route('/killSession', methods=['POST'])
 def kill_session():
     # verify that the password they provided hashes to the same value as the
     # known pw hash
@@ -87,7 +73,7 @@ def kill_session():
             ),
             category=FLASH_CLS['error']
         )
-        return redirect(url_for('home'))
+        return redirect(url_for('home.index'))
 
     resp = launch.kill(docker_id=request.form['docker_id'])
     HISTORY.append(resp)
@@ -98,7 +84,7 @@ def kill_session():
             message=resp.get('message', 'unhandled error'),
             category=FLASH_CLS['error']
         )
-        return redirect(url_for('home'))
+        return redirect(url_for('home.index'))
 
     flash(
         message="docker container {} killed successfully".format(
@@ -110,12 +96,4 @@ def kill_session():
     if entry is not None:
         entry.stop()
         db.session.commit()
-    return redirect(url_for('home'))
-
-
-if __name__ == '__main__':
-    try:
-        db.create_all()
-    except Exception as e:
-        pass
-    app.run(debug=False, host="0.0.0.0")
+    return redirect(url_for('home.index'))
