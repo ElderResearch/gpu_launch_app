@@ -6,12 +6,11 @@ import dash_daq as daq
 import dash_html_components as html
 from datetime import date, datetime, timedelta
 
-layout = dbc.Container(
+
+navbar = dbc.NavbarSimple(
     [
-        dbc.Row([
-            dbc.Col([
-                html.H3('Select Date Range'),
-                dcc.DatePickerRange(
+        dcc.Location(id='url', refresh=True),
+        dcc.DatePickerRange(
                     id='date-picker-range',
                     min_date_allowed=date(2019, 3, 2),
                     max_date_allowed=datetime.date(datetime.utcnow()),
@@ -19,9 +18,26 @@ layout = dbc.Container(
                         date(2019, 3, 2),
                         datetime.date(datetime.utcnow() - timedelta(days=30))),
                     end_date=datetime.date(datetime.utcnow()),
-                    style={"margin-top": 10}
-                )
-            ]),
+        )
+    ],
+    brand="gpu launch app",
+    brand_href="/",
+    brand_external_link=True,
+    color="primary",
+    dark=True,
+    fluid=True,
+)
+
+body = dbc.Container(
+    [
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    dcc.Graph(id='gantt-chart')
+                ])
+            ],
+            width=12,
+            )
         ]),
         dbc.Row([
             dbc.Col([
@@ -61,17 +77,9 @@ timeframe would have incurred a total cost of'''),
                 html.H4(id='aws-cost'),
                 html.P(
                     '''\
-This cost is not adjusted for the amount of time that GPU Box
+NOTE: This cost is not adjusted for the amount of time that GPU Box
 containers are left idle.'''),
             ]),
-        ]),
-        dbc.Row([
-            dbc.Col([
-                html.Div(
-                    dcc.Graph(id='gantt-chart')
-                )
-            ],
-            width=12)
         ]),
 
         # hidden div for holding data
@@ -80,3 +88,5 @@ containers are left idle.'''),
     fluid=True,
     className="mt-4"
 )
+
+layout = html.Div([navbar, body], id='main-div', className='dash-bootstrap')
