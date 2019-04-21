@@ -27,10 +27,10 @@ def register_dashapps(server):
 	}
 
     usageapp = dash.Dash(__name__,
-						server=server,
-						url_base_pathname='/usage/',
-						external_stylesheets=[dbc.themes.BOOTSTRAP],
-						meta_tags=[meta_viewport])
+                         server=server,
+                         url_base_pathname='/usage/',
+                         external_stylesheets=[dbc.themes.BOOTSTRAP],
+                         meta_tags=[meta_viewport])
 
     usageapp.title = 'Usage Dashboard'
     usageapp.layout = layout
@@ -48,6 +48,3 @@ def register_blueprints(server):
 
 	server.register_blueprint(home)
 
-
-if __name__ == "__main__":
-	app.run()

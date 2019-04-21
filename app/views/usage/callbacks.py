@@ -7,10 +7,10 @@ import plotly.graph_objs as go
 import plotly.figure_factory as ff
 from dash.dependencies import Input, Output, State
 from datetime import datetime, timedelta
+from flask import current_app, redirect, url_for
 from sqlalchemy import and_
 from app.extensions import db
 from app.models import ActivityLog
-
 
 def impute_stop_times(raw_data):
     client = docker.from_env()
@@ -109,13 +109,11 @@ def register_callbacks(dashapp):
             df.rename(columns={'username': 'Task', 'start_time': 'Start',
                                'stop_time': 'Finish', 'image_type': 'Resource'}, 
                       inplace=True)
-            #df.drop(columns=['num_gpus'], inplace=True)
             fig = ff.create_gantt(df=df, index_col='Resource', 
                                   group_tasks=True, showgrid_x=True,
-                                  showgrid_y=True, title='Timeline',
-                                  width='100%')
-            fig['layout'].update(width=None)
-            fig['layout'].update(height=None)
+                                  showgrid_y=True, width='100%', title='Container History')
+            fig['layout'].update(width=None, height=None, autosize=True)
+            fig['layout']['xaxis'].update(autorange=True)
+            fig['layout']['yaxis'].update(autorange=True)
             return fig
-
 
