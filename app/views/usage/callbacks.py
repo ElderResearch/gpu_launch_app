@@ -13,6 +13,14 @@ from app.extensions import db
 from app.models import ActivityLog
 
 def impute_stop_times(raw_data):
+    """
+    fill in missing container stop times.
+
+    for containers that are currently running, stop_time is
+    imputed to be the current time.
+    for other records missing a stop_time due to some error,
+    stop_time is imputed to be one day after start_time.
+    """
     client = docker.from_env()
     df = raw_data.copy()
     for idx in df.loc[df.stop_time.isna()].index:
@@ -37,24 +45,28 @@ def register_callbacks(dashapp):
             query = ActivityLog.query.filter(
                         and_(ActivityLog.start_time >= start_date,
                              ActivityLog.stop_time <= end_date))
-            df = pd.read_sql(query.statement, db.session.bind, 
-                             parse_dates=['start_time', 'stop_time'], 
+            df = pd.read_sql(query.statement, db.session.bind,
+                             parse_dates=['start_time', 'stop_time'],
                              index_col='id')
             imputed_df = impute_stop_times(df)
             return imputed_df.to_json(date_format='iso', orient='split')
         else:
             pass
 
-    @dashapp.callback(Output('graph-1', 'figure'),
+    @dashapp.callback(Output('launched-containers-bar', 'figure'),
                       [Input('data-div', 'children')])
-    def my_first_callback(jsonified_data):
+    def launched_containers_bar(jsonified_data):
+        """
+        create stacked bar chart counting number of launched containers
+        by username and image_type
+        """
         df = pd.read_json(jsonified_data, orient='split')
         if df.shape[0] > 0:
             data = []
             gp = pd.crosstab(df.username, df.image_type)
             for cname in gp.columns:
                 data.append(go.Bar(x=gp.index, y=gp[cname], name=cname))
-            layout = go.Layout(title='# of launched containers', 
+            layout = go.Layout(title='# of launched containers',
                                barmode="stack")
             return {"data": data, "layout": layout}
         else:
@@ -64,7 +76,14 @@ def register_callbacks(dashapp):
                       [Input('data-div', 'children')],
                       [State('date-picker-range', 'start_date'),
                        State('date-picker-range', 'end_date')])
-    def my_second_callback(jsonified_data, start_date, end_date):
+    def utilization_gauge(jsonified_data, start_date, end_date):
+        """
+        create gauge showing the utilization rate of the GPUs over
+        the selected time period
+
+        sum the runtime * num_gpus for all records in time period
+        divided by the time in time period * 4
+        """
         if start_date is not None:
             start_date = datetime.strptime(start_date, '%Y-%m-%d')
         if end_date is not None:
@@ -77,9 +96,13 @@ def register_callbacks(dashapp):
         else:
             return 0
 
-    @dashapp.callback(Output('graph-3', 'figure'),
+    @dashapp.callback(Output('container-runtime-bar', 'figure'),
                       [Input('data-div', 'children')])
-    def my_third_callback(jsonified_data):
+    def container_runtime_bar(jsonified_data):
+        """
+        create bar chart of total container runtime in hours
+        by username for the selected time period
+        """
         df = pd.read_json(jsonified_data, orient='split')
         if df.shape[0] > 0:
             df['runtime'] = df.stop_time - df.start_time
@@ -92,28 +115,42 @@ def register_callbacks(dashapp):
 
     @dashapp.callback(Output('aws-cost', 'children'),
                       [Input('data-div', 'children')])
-    def my_fourth_callback(jsonified_data):
+    def aws_cost_comparison(jsonified_data):
+        """
+        calculate the total cost of GPU utilization if run on AWS
+        for the selected time period. the calculated cost will be
+        an over-estimate as it does not account for the time that
+        users leave containers idle. if an equivalent workload were
+        run on AWS, users would ideally stop the instance when not
+        actively using it.
+        """
         df = pd.read_json(jsonified_data, orient='split')
+        HOURLY_COST = 3.06 # hourly cost of p3.2xlarge instance as of 22APR2019
         if df.shape[0] > 0:
             df['runtime'] = df.stop_time - df.start_time
-            cost = (df.loc[df.num_gpus > 0, 'runtime'].sum().total_seconds() / 3600) * 3.06
+            gpu_containers = df.loc[df.num_gpus > 0]
+            gpu_hours = gpu_containers['runtime'].sum().total_seconds() / 3600
+            cost = gpu_hours * HOURLY_COST
             return "${:0,.2f}".format(cost)
         else:
             return "$0.00"
 
-    @dashapp.callback(Output('gantt-chart', 'figure'),
+    @dashapp.callback(Output('container-gantt-chart', 'figure'),
                       [Input('data-div', 'children')])
-    def my_fifth_callback(jsonified_data):
+    def container_gantt_chart(jsonified_data):
+        """
+        create a gantt chart showing a timeline of launched containers
+        by username and image_type for the selected time period.
+        """
         df = pd.read_json(jsonified_data, orient='split')
         if df.shape[0] > 0:
             df.rename(columns={'username': 'Task', 'start_time': 'Start',
-                               'stop_time': 'Finish', 'image_type': 'Resource'}, 
+                               'stop_time': 'Finish', 'image_type': 'Resource'},
                       inplace=True)
-            fig = ff.create_gantt(df=df, index_col='Resource', 
+            fig = ff.create_gantt(df=df, index_col='Resource',
                                   group_tasks=True, showgrid_x=True,
                                   showgrid_y=True, width='100%', title='Container History')
             fig['layout'].update(width=None, height=None, autosize=True)
             fig['layout']['xaxis'].update(autorange=True)
             fig['layout']['yaxis'].update(autorange=True)
             return fig
-
