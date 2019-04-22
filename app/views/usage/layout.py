@@ -33,7 +33,7 @@ body = dbc.Container(
         dbc.Row([
             dbc.Col([
                 html.Div([
-                    dcc.Graph(id='gantt-chart')
+                    dcc.Graph(id='container-gantt-chart')
                 ])
             ],
             width=12,
@@ -41,7 +41,7 @@ body = dbc.Container(
         ]),
         dbc.Row([
             dbc.Col([
-                dcc.Graph(id='graph-1')
+                dcc.Graph(id='launched-containers-bar')
             ]),
             dbc.Col([
                 daq.Gauge(
@@ -50,10 +50,10 @@ body = dbc.Container(
                     units="%",
                     label='GPU Utilization',
                     color={
-                        "gradient": True, 
+                        "gradient": True,
                         "ranges": {
-                            "red": [0, 25], 
-                            "yellow": [25, 75], 
+                            "red": [0, 25],
+                            "yellow": [25, 75],
                             "green": [75, 100]
                         }
                     },
@@ -66,7 +66,7 @@ body = dbc.Container(
         ]),
         dbc.Row([
             dbc.Col([
-                dcc.Graph(id='graph-3')
+                dcc.Graph(id='container-runtime-bar')
             ]),
             dbc.Col([
                 html.H3('AWS Cost Comparison'),
