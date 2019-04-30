@@ -33,7 +33,7 @@
                         <form action="/killSession" class="form-inline" method="POST">
                             <input type="hidden" id="kill-docker-id" name="docker_id" value="{{ x.id }}">
                             <input type="hidden" id="kill-pw-hash" name="pwhash" value="{{ x.pwhash }}">
-                            <input type="password" id="kill-password" name="jupyter_pwd" class="form-control" placeholder="enter jupyter password">
+                            <input type="password" id="kill-password" name="password" class="form-control" placeholder="enter jupyter password">
                             <button type="submit" id="kill_submit" name="kill session" value="kill session" class="btn btn-danger">
                                 kill session
                             </button>
@@ -66,9 +66,9 @@
                 Password
             </label>
             <p id="create-password-help" class="form-text text-muted">
-                <strong>this is not your login password!</strong> this password will be used for your login to the <code>jupyter notebook</code> server and as authentication for killing your container
+                <strong>this is your gpu-box login password!</strong> this password will be used for your login to the <code>jupyter notebook</code> server and as authentication for killing your container
             </p>
-            <input type="password" class="form-control" id="create-password" name="jupyter_pwd" placeholder="enter password">
+            <input type="password" class="form-control" id="create-password" name="password" placeholder="enter password">
         </div>
         <div class="form-group">
             <label for="create-imagetype" class="col-form-label">

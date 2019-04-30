@@ -21,12 +21,15 @@ import hashlib
 import logging
 import os
 import pwd
+import pam
+import getpass
 
 import dateutil.parser
 import docker
 import notebook.auth
 import psutil
 import pytz
+from notebook.auth import passwd
 
 # ----------------------------- #
 #   Module Constants            #
@@ -38,13 +41,13 @@ INSTALLED_DEVICES = set(['0', '1', '2', '3'])
 
 ERI_IMAGES = {
     'Python': {
-        'image': 'eri_dev:latest',
+        'image': 'eri_dev:{tag}',
         'auto_remove': True,
         'detach': True,
         'ports': {8888: 'auto'}
     },
     'Python+R': {
-        'image': 'eri_dev_p_r:latest',
+        'image': 'eri_dev_p_r:{tag}',
         'auto_remove': True,
         'detach': True,
         'ports': {8888: 'auto', 8787: 'auto'}
@@ -138,9 +141,8 @@ def active_eri_images(client=None, ignore_other_images=False):
         }
 
         if imagetype in JUPYTER_IMAGES + R_IMAGES:
-            # we set a password value to launch this image; go get it
-            pw = _env_lookup(c, 'PASSWORD')
-            d['pwhash'] = hashlib.md5(pw.encode()).hexdigest()
+            # we set a hashed password value to launch this image; go get it
+            d['pwhash'] = _env_lookup(c, 'PASSWORD')
 
         if imagetype in JUPYTER_IMAGES:
             # go get the actual mapped port (dynamically allocated for non-gpu
@@ -223,21 +225,6 @@ def _update_environment(imagedict, key, val):
         env.append('{}={}'.format(key, val))
     imagedict['environment'] = env
 
-
-def _setup_jupyter_password(imagedict, jupyter_pwd=None):
-    print('user = {}'.format(imagedict['environment']['USER']))
-    print('jupyter_pwd = {}'.format(jupyter_pwd))
-    if jupyter_pwd in [None, '']:
-        msg = "you must provide a password for the jupyter notebook service"
-        return False, msg
-
-    # the neighboring jupyter_notebook_config.py file will look for an
-    # environment variable PASSWORD, so we need to set that in our container
-    _update_environment(imagedict, 'PASSWORD', jupyter_pwd)
-
-    return True, None
-
-
 def _find_open_port(start=8890, stop=9000):
     used_ports = {
         connection.laddr.port
@@ -254,14 +241,15 @@ def _find_open_port(start=8890, stop=9000):
     )
 
 
-def launch(username, imagetype=None, jupyter_pwd=None, num_gpus=0, **kwargs):
+def launch(username, password=None, imagetype=None, imagetag="latest", num_gpus=0, **kwargs):
     """launch a docker container for user `username` of type `imagetype`
 
     args:
         username (str): linux user name, used for mounting home directories
+        password (str): linux password
         imagetype (str): module-specific enumeration of available images
-            (default: 'single_gpu', which points to docker image `eri_dev:latest`)
-        jupyter_pwd (str): password for jupyter notebook signin
+            (default: 'Python', which points to docker image `eri_dev`)
+        imagetag (str): the docker tag of the image to launch (default: 'latest')
         num_gpus (int): number of gpus to assign to container
         kwargs (dict): all other keyword args are passed to the
             `client.containers.run` function
@@ -288,20 +276,18 @@ def launch(username, imagetype=None, jupyter_pwd=None, num_gpus=0, **kwargs):
     if not launchable:
         return _error(msg)
 
-    # check for user name and add that as the `user` value if it exists
-    try:
+    # validate linux username/password
+    # prevents users from launching containers as "astewart"
+    if not pam.authenticate(username, password):
+        msg = ("Incorrect username or password. Or user was not configured properly "
+               "Try username/password again. If error persists, contact admins")
+        return _error(msg)
+    else:
+        # add the username as an environment variable. for shits and gigs,
+        # but also because it helps us build our webapp down the line
         p = pwd.getpwnam(username)
         imagedict['user'] = '{p.pw_uid}:{p.pw_gid}'.format(p=p)
-
-        # add the user's name as an environment variable. for shits and gigs,
-        # but also because it helps us build our webapp down the line
         _update_environment(imagedict, 'USER', username)
-    except KeyError:
-        msg = "user '{}' does not exist on this system; contact administrators"
-        msg = msg.format(username)
-        return _error(msg)
-    except Exception as e:
-        return _error("unhandled error getting user name info: {}".format(e))
 
     # verify that this user has a home directory on the base server (will be
     # used in mounting step)
@@ -318,13 +304,16 @@ def launch(username, imagetype=None, jupyter_pwd=None, num_gpus=0, **kwargs):
 
     # add image type to container labels
     imagedict['labels'] = {'image_type': imagetype}
+    
+    # add image tag
+    imagedict['image'] = imagedict['image'].format(tag=imagetag)
 
     # take care of some of the jupyter notebook specific steps
     if imagetype in JUPYTER_IMAGES:
-        # configure the jupyter notebook password
-        success, msg = _setup_jupyter_password(imagedict, jupyter_pwd)
-        if not success:
-            return _error(msg)
+        # hash the linux password using notebook.auth.passwd()
+        # the neighboring jupyter_notebook_config.py file will look for an
+        # environment variable PASSWORD, so we need to set that in our container
+        _update_environment(imagedict, 'PASSWORD', passwd(password))
 
         # update ports dictionary for this instance if this is an auto
         if imagedict['ports'][8888] == 'auto':
@@ -427,12 +416,16 @@ def kill(docker_id):
 # ----------------------------- #
 #   Command line                #
 # ----------------------------- #
-
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    username = "user name (must be a created user on the gpu box)"
+    username = ("username (must be a created user on the gpu box). "
+                "Will be requested if not passed")
     parser.add_argument("-u", "--username", help=username)
+
+    password = ("password on gpu box. DO NOT PASS if running from command line. "
+                "Will be requsted if not passed")
+    parser.add_argument('-p','--password', help = password)
 
     imagetype = "type of image to launch"
     parser.add_argument(
@@ -440,11 +433,9 @@ def parse_args():
         default='Python'
     )
 
-    jupyter_pwd = (
-        "jupyter password (only required for environments which have jupyter"
-        " notebook services running in them)"
-    )
-    parser.add_argument("-p", "--jupyterpwd", help=jupyter_pwd)
+    imagetag = 'tag of docker image to launch (default = "latest")'
+    parser.add_argument(
+            "--imagetag", help=imagetag, default = 'latest')
 
     num_gpus = "number of gpus to be attached to container"
     parser.add_argument("-g", "--numgpus", help=num_gpus, default=0)
@@ -454,9 +445,18 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
+
+    # request username and password if not passed
+    if not args.username:
+        args.username = input('username: ')
+    if not args.password:
+        args.password = getpass.getpass()
+
     launch(
         username=args.username,
+        password=args.password,
         imagetype=args.imagetype,
-        jupyter_pwd=args.jupyterpwd,
-	num_gpus=args.numgpus
+        imagetag=args.imagetag,
+        num_gpus=args.numgpus
     )
+

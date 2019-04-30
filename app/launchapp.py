@@ -1,6 +1,6 @@
 from datetime import datetime
-import hashlib
 import os
+from notebook.auth.security import passwd, passwd_check
 
 from . import launch
 from flask import Flask, flash, redirect, render_template, request, url_for
@@ -58,7 +58,7 @@ def create_session():
     resp = launch.launch(
         username=request.form['username'],
         imagetype=request.form['imagetype'],
-        jupyter_pwd=request.form['jupyter_pwd'],
+        password=request.form['password'],
         num_gpus=request.form['num_gpus']
     )
     HISTORY.append(resp)
@@ -88,9 +88,7 @@ def create_session():
 def kill_session():
     # verify that the password they provided hashes to the same value as the
     # known pw hash
-    truehash = request.form['pwhash']
-    newhash = hashlib.md5(request.form['jupyter_pwd'].encode()).hexdigest()
-    if truehash != newhash:
+    if not passwd_check(request.form['pwhash'], request.form['password']):
         flash(
             message=(
                 "unable to kill session - incorrect password. if this is"
