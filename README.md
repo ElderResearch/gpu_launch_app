@@ -19,3 +19,20 @@ the relevant apache2 virtual host config lives at `/etc/apache2/sites-available/
 you can view the error log by running `sudo less /var/log/apache2/error.log`
 
 CAUTION: other than running `git pull`, you should never directly edit the files located in `/var/www/gpu_launch_app`!
+
+## development
+
+to enable debugging utilities and server auto-reload functionality, set the `flask` server in development mode and run with the `flask` cli utility.
+
+```sh
+$ export FLASK_ENV=development
+$ flask run --host 0.0.0.0
+```
+
+additionally, you may enter a `flask` shell context environment for simple testing and debugging. the `flask` shell context starts a Python REPL, imports the `db` and `ActivityLog` objects, and exposes the app context.
+
+```sh
+$ flask shell
+```
+
+in both cases above, the sqlite database will be initialized in-memory and autopopulated with random data. exiting the shell context or stopping the development server will destrpy the ephemeral database.
