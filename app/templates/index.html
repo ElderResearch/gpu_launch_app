@@ -7,12 +7,12 @@
     <p>to view usage statistics, <a href="/usage">click here</a> <span class="badge badge-info">NEW</span></p>
     <h2>currently active sessions</h2>
     <div>
-        <table class="table table=striped">
+        <table class="table table-striped table-sm">
             <thead>
                 <tr>
                     <th scope="col">type</th>
                     <th scope="col">owner</th>
-                    <th scope="col"># attached gpus</th>
+                    <th scope="col"># gpus</th>
                     <th scope="col">jupyter url</th>
                     <th scope="col">rstudio url</th>
                     <th scope="col">docker id</th>
@@ -26,18 +26,20 @@
                     <td>{{ x.imagetype }}</td>
                     <td>{{ x.username }}</td>
                     <td>{{ x.num_gpus }}</td>
-                    <td><a href="{{ x.jupyter_url }}">{{ x.jupyter_url[:14] + x.jupyter_url[36:]}}</a></td>
-                    <td><a href="{{ x.rstudio_url }}">{{ x.get('rstudio_url','')[:14] + x.get('rstudio_url','')[36:] }}</a></td>
+                    <td><a href="{{ x.jupyter_url }}" target="_blank">{{ x.jupyter_url[:14] + x.jupyter_url[36:]}}</a></td>
+                    <td><a href="{{ x.rstudio_url }}" target="_blank">{{ x.get('rstudio_url','')[:14] + x.get('rstudio_url','')[36:] }}</a></td>
                     <td>{{ x.id[:10] }}</td>
                     <td>{{ x.uptime }}</td>
                     <td>
                         <form action="/killSession" class="form-inline" method="POST">
-                            <input type="hidden" id="kill-docker-id" name="docker_id" value="{{ x.id }}">
-                            <input type="hidden" id="kill-pw-hash" name="pwhash" value="{{ x.pwhash }}">
-                            <input type="password" id="kill-password" name="password" class="form-control" placeholder="enter jupyter password">
-                            <button type="submit" id="kill_submit" name="kill session" value="kill session" class="btn btn-danger">
-                                kill session
-                            </button>
+			    <div class="row">
+                            	<input type="hidden" id="kill-docker-id" name="docker_id" value="{{ x.id }}">
+                            	<input type="hidden" id="kill-pw-hash" name="pwhash" value="{{ x.pwhash }}">
+                            	<input type="password" id="kill-password" name="password" class="form-control form-control-sm" placeholder="enter password">
+                            	<button type="submit" id="kill_submit" name="kill session" value="kill session" class="btn btn-danger btn-sm">
+                                    kill session
+                            	</button>
+			    </div>
                         </form>
                     </td>
                 </tr>
@@ -71,7 +73,8 @@
             </p>
             <input type="password" class="form-control" id="create-password" name="password" placeholder="enter password">
         </div>
-        <div class="form-group">
+	<div class="form-row">
+        <div class="form-group col-md-6">
             <label for="create-imagetype" class="col-form-label">
                 Image Type
             </label>
@@ -84,7 +87,7 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="form-group">
+        <div class="form-group col-md-6">
             <label for="choose-gpus" class="col-form-label">
                 Number of GPUs
             </label>
@@ -97,6 +100,7 @@
                 {% endfor %}
             </select>
         </div>
+	</div>
         <button type="submit" id="create-submit" class="btn btn-success" value="launch session">
             launch session
         </button>
