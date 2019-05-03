@@ -3,3 +3,4 @@
 .ftpconfig
 *venv/
 *__pycache__/
+.env

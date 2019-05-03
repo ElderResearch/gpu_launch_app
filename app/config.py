@@ -5,8 +5,7 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class BaseConfig:
-    SECRET_KEY = \
-    '\xc8d\x19E}\xa5g\xbbC\xbd\xe2\x17\x83\xfa!>\xead\x07p\xbd\x92\xce\x85'
+    SECRET_KEY = "change-this-super-secret-key"
     DEBUG = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
@@ -15,4 +14,5 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
    
 class ProductionConfig(BaseConfig):
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
+    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+    SECRET_KEY = os.environ['FLASK_SECRET_KEY']
