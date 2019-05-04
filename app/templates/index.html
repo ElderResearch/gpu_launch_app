@@ -10,39 +10,19 @@
         <table class="table table-striped table-sm">
             <thead>
                 <tr>
-                    <th scope="col">type</th>
-                    <th scope="col">owner</th>
-                    <th scope="col"># gpus</th>
-                    <th scope="col">jupyter url</th>
-                    <th scope="col">rstudio url</th>
                     <th scope="col">docker id</th>
+		    <th scope="col">type</th>
+                    <th scope="col">owner</th>
+                    <th scope="col">gpus</th>
                     <th scope="col">uptime</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
                     <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
                 {% for x in launched_sessions %}
-                <tr>
-                    <td>{{ x.imagetype }}</td>
-                    <td>{{ x.username }}</td>
-                    <td>{{ x.num_gpus }}</td>
-                    <td><a href="{{ x.jupyter_url }}" target="_blank">{{ x.jupyter_url[:14] + x.jupyter_url[36:]}}</a></td>
-                    <td><a href="{{ x.rstudio_url }}" target="_blank">{{ x.get('rstudio_url','')[:14] + x.get('rstudio_url','')[36:] }}</a></td>
-                    <td>{{ x.id[:10] }}</td>
-                    <td>{{ x.uptime }}</td>
-                    <td>
-                        <form action="/killSession" class="form-inline" method="POST">
-			    <div class="row">
-                            	<input type="hidden" id="kill-docker-id" name="docker_id" value="{{ x.id }}">
-                            	<input type="hidden" id="kill-pw-hash" name="pwhash" value="{{ x.pwhash }}">
-                            	<input type="password" id="kill-password" name="password" class="form-control form-control-sm" placeholder="enter password">
-                            	<button type="submit" id="kill_submit" name="kill session" value="kill session" class="btn btn-danger btn-sm">
-                                    kill session
-                            	</button>
-			    </div>
-                        </form>
-                    </td>
-                </tr>
+		    {% include "_launched_session.html" %}
                 {% else %}
                 <tr>
                     <td><em>no active images</em></td>
@@ -134,4 +114,8 @@
     <iframe src="https://calendar.google.com/calendar/embed?showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;mode=WEEK&amp;height=600&amp;wkst=1&amp;bgcolor=%23ffffff&amp;src=datamininglab.com_6taegbbncqqjuv6pum1fo61ej8%40group.calendar.google.com&amp;color=%232F6309&amp;ctz=America%2FNew_York"
         style="border-width:0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
 </div>
+
+{% for x in launched_sessions %}
+	{% include "_kill_session_modal.html" %}
+    {% endfor %}
 {% endblock %}
