@@ -95,9 +95,6 @@ def _calculate_uptime(t0):
     minutes, seconds = divmod(rem, 60)
     return days, hours, minutes, seconds
 
-def _change_rstudio_password(c, new_pw):
-    c.exec_run()
-    pass
 
 def _running_images(client=None, ignore_other_images=False):
     return [tag for c in client.containers.list() for tag in c.image.tags]
