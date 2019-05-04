@@ -14,5 +14,5 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
    
 class ProductionConfig(BaseConfig):
-    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
-    SECRET_KEY = os.environ['FLASK_SECRET_KEY']
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SECRET_KEY = os.getenv('FLASK_SECRET_KEY')
