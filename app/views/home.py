@@ -1,6 +1,7 @@
 import hashlib
 import os
 from notebook.auth.security import passwd, passwd_check
+from urllib.parse import urlparse
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from .. import launch
@@ -15,6 +16,15 @@ FLASH_CLS = {
 }
 
 home = Blueprint('home', __name__)
+
+@home.context_processor
+def process_context():
+    
+    def container_url(port):
+        u = urlparse(url_for('home.index', _external=True))
+        return u._replace(netloc=u.netloc.replace(str(u.port), str(port))).geturl()
+    
+    return dict(container_url=container_url)
 
 @home.route('/', methods=['GET'])
 def index():

@@ -148,20 +148,16 @@ def active_eri_images(client=None, ignore_other_images=False):
             # go get the actual mapped port (dynamically allocated for non-gpu
             # dev boxes, so can't just pull it from the imagedict in ERI_IMAGES
             # which we looked up a few lines back)
-            port = int(
+            d['jupyter_port'] = int(
                 c.attrs['HostConfig']['PortBindings']['8888/tcp'][0]['HostPort']
             )
-
-            d['jupyter_url'] = '{0}:{1}'.format(url, port)
 
         if imagetype in R_IMAGES:
             # similarly for the rstudio server, go find the port from the
             # container config
-            port = int(
+            d['rstudio_port'] = int(
                 c.attrs['HostConfig']['PortBindings']['8787/tcp'][0]['HostPort']
             )
-
-            d['rstudio_url'] = '{0}:{1}'.format(url, port)
 
         # check for a username environment variable
         d['username'] = _env_lookup(c, 'USER')
@@ -381,14 +377,10 @@ def launch(username, password=None, imagetype=None, imagetag="latest", num_gpus=
         'message': 'container launched successfully',
         'status': SUCCESS,
         'imagetype': imagetype,
-        'jupyter_url': 'http://eri-gpu:{}/'.format(imagedict['ports'][8888]),
         'image': imagedict['image'],
         'username': username,
         'num_gpus': num_gpus,
     }
-
-    if imagetype in R_IMAGES:
-        d['rstudio_url'] = 'http://eri-gpu:{}'.format(imagedict['ports'][8787])
 
     for attr in ['id', 'name', 'status']:
         d[attr] = getattr(container, attr)

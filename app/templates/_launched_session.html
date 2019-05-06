@@ -4,9 +4,9 @@
 	<td>{{ x.username }}</td>
 	<td>{{ x.num_gpus }}</td>
         <td>{{ x.uptime }}</td>
-	<td><a class="btn btn-info btn-sm" href="{{ x.jupyter_url }}" target="_blank">launch jupyter</a></td>
-	{% if x.rstudio_url %}
-	    <td><a class="btn btn-info btn-sm" href="{{ x.rstudio_url }}" target="_blank">launch rstudio</a></td>
+	<td><a class="btn btn-info btn-sm" href="{{ container_url(x.jupyter_port) }}" target="_blank">launch jupyter</a></td>
+	{% if x.rstudio_port %}
+	    <td><a class="btn btn-info btn-sm" href="{{ container_url(x.rstudio_port) }}" target="_blank">launch rstudio</a></td>
 	{% else %}
 	    <td></td>
 	{% endif %}
