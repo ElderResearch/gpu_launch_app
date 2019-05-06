@@ -35,55 +35,49 @@
 <div id="session-launcher-form">
     <h2>launch a gpu session</h2>
     <form action="/createSession" method="POST">
-        <div class="form-group">
-            <label for="create-username" class="col-form-label">
-                User Name
-            </label>
-            <p id="create-username-help" class="form-text text-muted">
-                this username must be a valid linux username on the gpu machine
-            </p>
-            <input type="text" class="form-control" id="create-username" name="username" placeholder="enter username">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="create-username" class="col-form-label">
+                    User Name
+                </label>
+                <input type="text" class="form-control" id="create-username" name="username" placeholder="enter username" data-toggle="tooltip" title="this username must be a valid linux username on the gpu machine">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="create-password" class="col-form-label">
+                    Password
+                </label>
+                <input type="password" class="form-control" id="create-password" name="password" placeholder="enter password" data-toggle="tooltip" title="<b>this is your gpu-box login password!</b><br />this password will be used for your login to the <code>jupyter notebook</code> server <br />and as authentication for killing your container">
+            </div>
         </div>
-        <div class="form-group">
-            <label for="create-password" class="col-form-label">
-                Password
-            </label>
-            <p id="create-password-help" class="form-text text-muted">
-                <strong>this is your gpu-box login password!</strong> this password will be used for your login to the <code>jupyter notebook</code> server and as authentication for killing your container
-            </p>
-            <input type="password" class="form-control" id="create-password" name="password" placeholder="enter password">
+    	<div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="create-imagetype" class="col-form-label">
+                    Image Type
+                </label>
+                <select type="text" class="form-control" required id="create-imagetype" name="imagetype" data-toggle="tooltip" title="this is an eri-specific shorthand for the docker image you wish to launch">
+                    {% for sessopt in sessoptions %}
+                    <option {% if sessopt in disabled_options %} disabled {% elif sessopt=="gpu_dev" %} selected="selected" {% endif %}>{{ sessopt }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="choose-gpus" class="col-form-label">
+                    Number of GPUs
+                </label>
+                <select type="text" class="form-control" required id="choose-gpus" name="num_gpus" data-toggle="tooltip" title="choose the number of gpus you wish to attach">
+                    {% for num_gpu in num_avail_gpus %}
+                    <option {% if num_gpu=='0' %} selected="selected" {% endif %}>{{ num_gpu }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+    	</div>
+        <div class="row justify-content-md-center">
+            <div class="col-md-6">
+                <button type="submit" id="create-submit" class="btn btn-success btn-block" value="launch session">
+                    launch session
+                </button>
+            </div>
         </div>
-	<div class="form-row">
-        <div class="form-group col-md-6">
-            <label for="create-imagetype" class="col-form-label">
-                Image Type
-            </label>
-            <p id="create-sessopt-help" class="form-text text-muted">
-                this is an eri-specific shorthand for the docker image you wish to launch
-            </p>
-            <select type="text" class="form-control" required id="create-imagetype" name="imagetype">
-                {% for sessopt in sessoptions %}
-                <option {% if sessopt in disabled_options %} disabled {% elif sessopt=="gpu_dev" %} selected="selected" {% endif %}>{{ sessopt }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group col-md-6">
-            <label for="choose-gpus" class="col-form-label">
-                Number of GPUs
-            </label>
-            <p id="choose-gpus-help" class="form-text text-muted">
-                choose the number of gpus you wish to attach
-            </p>
-            <select type="text" class="form-control" required id="choose-gpus" name="num_gpus">
-                {% for num_gpu in num_avail_gpus %}
-                <option {% if num_gpu=='0' %} selected="selected" {% endif %}>{{ num_gpu }}</option>
-                {% endfor %}
-            </select>
-        </div>
-	</div>
-        <button type="submit" id="create-submit" class="btn btn-success" value="launch session">
-            launch session
-        </button>
     </form>
 </div>
 <div id="session-launcher-explainer">

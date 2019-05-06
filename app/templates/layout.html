@@ -24,6 +24,36 @@
             integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
                 crossorigin="anonymous"></script>
 
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $("#create-username").tooltip({
+                    placement:"top",
+                    html: true
+                });
+
+                $("#create-password").tooltip({
+                    placement:"top",
+                    html: true
+                });
+
+                $("#create-imagetype").tooltip({
+                    placement:"top",
+                    html: true
+                });
+
+                $("#choose-gpus").tooltip({
+                    placement:"top",
+                    html: true
+                });
+            });
+        </script>
+
+        <style>
+        .tooltip-inner {
+            white-space:pre;
+            max-width:none;
+        }
+        </style>
     </head>
     <body>
         <div class="container">
