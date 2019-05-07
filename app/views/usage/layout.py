@@ -5,88 +5,75 @@ import dash_core_components as dcc
 import dash_daq as daq
 import dash_html_components as html
 from datetime import date, datetime, timedelta
+from flask import url_for
 
+def key_metric_card(id, title, default_value='', subtext=''):
+    return html.Div([
+            html.Div([
+                html.H4(title, className='my-0 font-weight-normal')
+            ], className='card-header'),
+            html.Div([
+                html.H1([
+                    default_value
+                ], className='card-title', id=id),
+                html.Small(subtext, className='text-muted')
+            ], className='card-body')
+    ], className="card mb-4 shadow-sm")
 
-navbar = dbc.NavbarSimple(
-    [
-        dcc.Location(id='url', refresh=True),
-        dcc.DatePickerRange(
-                    id='date-picker-range',
-                    min_date_allowed=date(2019, 3, 2),
-                    max_date_allowed=datetime.date(datetime.utcnow()),
-                    start_date=max(
-                        date(2019, 3, 2),
-                        datetime.date(datetime.utcnow() - timedelta(days=30))),
-                    end_date=datetime.date(datetime.utcnow()),
-        )
-    ],
-    brand="gpu launch app",
-    brand_href="/",
-    brand_external_link=True,
-    color="primary",
-    dark=True,
-    fluid=True,
-)
+def graph_card(id, title):
+    return html.Div([
+            html.Div([
+                html.H4(title, className='my-0 font-weight-normal')
+            ], className='card-header'),
+            html.Div(dcc.Graph(), id=id, className='card-img-top')
+    ], className="card mb-4 shadow-sm")
 
-body = dbc.Container(
-    [
-        dbc.Row([
-            dbc.Col([
-                html.Div([
-                    dcc.Graph(id='container-gantt-chart')
-                ])
-            ],
-            width=12,
-            )
-        ]),
-        dbc.Row([
-            dbc.Col([
-                dcc.Graph(id='launched-containers-bar')
-            ]),
-            dbc.Col([
-                daq.Gauge(
-                    id='utilization-gauge',
-                    showCurrentValue=True,
-                    units="%",
-                    label='GPU Utilization',
-                    color={
-                        "gradient": True,
-                        "ranges": {
-                            "red": [0, 25],
-                            "yellow": [25, 75],
-                            "green": [75, 100]
-                        }
-                    },
-                    min=0,
-                    max=100,
-                    value=0,
-                    size=350
-                    )
-            ]),
-        ]),
-        dbc.Row([
-            dbc.Col([
-                dcc.Graph(id='container-runtime-bar')
-            ]),
-            dbc.Col([
-                html.H3('AWS Cost Comparison'),
-                html.P(
-                    '''\
-Based on the p3.2xlarge EC2 instance, GPU usage during the selected
-timeframe would have incurred a total cost of'''),
-                html.H4(id='aws-cost'),
-                html.P(
-                    '''\
-NOTE: This cost is not adjusted for the amount of time that GPU Box
-containers are left idle.'''),
-            ]),
-        ]),
+navbar = html.Div([
+    html.A(
+        html.H4("gpu launch app"),
+        href='/', className="my-0 mr-md-auto font-weight-normal text-muted"),
 
-        # hidden div for holding data
-        dbc.Row(dbc.Col(html.Div(id='data-div', style={'display': 'none'})))
-    ],
-    fluid=True,
-    className="mt-4"
-)
+    dcc.DatePickerRange(
+                id='date-picker-range',
+                min_date_allowed=date(2019, 3, 2),
+                max_date_allowed=datetime.date(datetime.utcnow()),
+                start_date=max(
+                    date(2019, 3, 2),
+                    datetime.date(datetime.utcnow() - timedelta(days=30))),
+                end_date=datetime.date(datetime.utcnow()),
+    )
+], className="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm")
 
-layout = html.Div([navbar, body], id='main-div', className='dash-bootstrap')
+body = html.Div([
+    html.Div([
+        key_metric_card(id='total-containers', title='Containers',
+                        default_value='0'),
+        key_metric_card(id='total-hours', title='Runtime (hrs)',
+                        default_value='0'),
+        key_metric_card(id='gpu-utilization', title='GPU Utilization',
+                        default_value='0%'),
+        key_metric_card(id='aws-cost', title='AWS Savings',
+                        default_value='$0',
+                        subtext='based on p3.2xlarge instance'),
+    ], className='card-deck text-center'),
+    html.Div([
+        graph_card(id='container-gantt-chart',
+                   title='Container Timeline'),
+    ], className='card-deck text-center'),
+    html.Div([
+        graph_card(id='launched-containers-bar',
+                   title='Containers'),
+        graph_card(id='container-runtime-bar',
+                   title='Runtime (hrs)'),
+    ], className='card-deck text-center'),
+    html.Div([
+        graph_card(id='gpu-utilization-pie',
+                   title='Total GPU Usage (gpu-hrs)'),
+        graph_card(id='gpu-utilization-bar',
+                   title='GPU Utilization Rate per User'),
+    ], className='card-deck text-center'),
+
+    html.Div(id='data-div', style={'display': 'none'})
+], className='container')
+
+layout = html.Div([navbar, body], id='main-div')
