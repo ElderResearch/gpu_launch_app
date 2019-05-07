@@ -2,7 +2,6 @@
 
 import os
 import dash
-import dash_bootstrap_components as dbc
 from flask import Flask
 from flask.cli import load_dotenv
 from flask.helpers import get_root_path

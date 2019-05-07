@@ -109,7 +109,6 @@ def register_callbacks(dashapp):
             used = ((df['stop_time'] - df['start_time']).dt.seconds * \
                     df['num_gpus']).sum()
             total = (end_date - start_date).total_seconds() * 4
-            utilization = used / total * 100
 
             return "{:.0%}".format(used/total)
 
@@ -182,7 +181,7 @@ def register_callbacks(dashapp):
         """
         df = pd.read_json(jsonified_data, orient='split')
 
-        return [df.shape[0]]
+        return ["{:,}".format(df.shape[0])]
 
 
     @dashapp.callback(Output('total-hours', 'children'),
