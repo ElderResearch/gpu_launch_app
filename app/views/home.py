@@ -22,7 +22,10 @@ def process_context():
     
     def container_url(port):
         u = urlparse(url_for('home.index', _external=True))
-        return u._replace(netloc=u.netloc.replace(str(u.port), str(port))).geturl()
+        if u.port:
+            return u._replace(netloc=u.netloc.replace(str(u.port), str(port))).geturl()
+        else:
+            return "{}:{}{}".format(u._replace(path='').geturl(), port, u.path)
     
     return dict(container_url=container_url)
 
