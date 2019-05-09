@@ -34,11 +34,10 @@ navbar = html.Div([
 
     dcc.DatePickerRange(
                 id='date-picker-range',
+                updatemode='bothdates',
                 min_date_allowed=date(2019, 3, 2),
                 max_date_allowed=datetime.date(datetime.utcnow()),
-                start_date=max(
-                    date(2019, 3, 2),
-                    datetime.date(datetime.utcnow() - timedelta(days=30))),
+                start_date=datetime.date(datetime.utcnow() - timedelta(days=30)),
                 end_date=datetime.date(datetime.utcnow()),
     )
 ], className="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm")

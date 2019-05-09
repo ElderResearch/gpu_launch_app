@@ -24,9 +24,10 @@ def impute_stop_times(raw_data):
     stop_time is imputed to be one day after start_time.
     """
     client = docker.from_env()
+    running = [c.id for c in client.containers.list(sparse=True)]
     df = raw_data.copy()
     for idx in df.loc[df.stop_time.isna()].index:
-        if client.containers.get(idx): # container still running
+        if idx in running: # container still running
             df.loc[idx, 'stop_time'] = datetime.utcnow()
         else:
             df.loc[idx, 'stop_time'] = df.loc[idx, 'start_time'] + \
@@ -40,8 +41,8 @@ def trim_start_stop(raw_data, start_date, end_date):
     df = raw_data.copy()
     start_date = datetime.strptime(start_date, '%Y-%m-%d')
     end_date = datetime.strptime(end_date, '%Y-%m-%d')
-    df.loc[df.start_time < start_date]['start_time'] = start_date
-    df.loc[df.stop_time > end_date]['stop_time'] = end_date
+    df.loc[df.start_time < start_date, 'start_time'] = start_date
+    df.loc[df.stop_time > end_date, 'stop_time'] = end_date
 
     return df
 
