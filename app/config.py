@@ -12,7 +12,9 @@ class BaseConfig:
 
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
-   
+    if 'DATABASE_URL' in os.environ:
+        SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+
 class ProductionConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SECRET_KEY = os.getenv('FLASK_SECRET_KEY')

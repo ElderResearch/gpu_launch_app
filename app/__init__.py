@@ -63,7 +63,7 @@ def register_extensions(server):
     db.init_app(server)
     with server.app_context():
         db.create_all()
-        if os.getenv('FLASK_ENV') == 'development':
+        if os.getenv('FLASK_ENV') == 'development' and 'DATABASE_URL' not in os.environ:
             rows = generate_usage_log_data(ActivityLog)
             db.session.add_all(rows)
             try:
