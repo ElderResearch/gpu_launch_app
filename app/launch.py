@@ -23,6 +23,7 @@ import os
 import pwd
 import pam
 import getpass
+import hashlib
 
 import dateutil.parser
 import docker
@@ -310,6 +311,12 @@ def launch(username, password=None, imagetype=None, imagetag="latest", num_gpus=
         # the neighboring jupyter_notebook_config.py file will look for an
         # environment variable PASSWORD, so we need to set that in our container
         _update_environment(imagedict, 'PASSWORD', passwd(password))
+
+        # hash the linux password and store as environment variable
+        # used to connect local IDEs (e.g., atom, vscode) to remote jupyter sessions
+        h = hashlib.new('sha256')
+        h.update(password.encode())
+        _update_environment(imagedict, 'JUPYTERTOKEN', h.hexdigest())
 
         # update ports dictionary for this instance if this is an auto
         if imagedict['ports'][8888] == 'auto':
