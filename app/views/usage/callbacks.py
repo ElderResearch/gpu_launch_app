@@ -10,7 +10,7 @@ import plotly.figure_factory as ff
 from dash.dependencies import Input, Output, State
 from datetime import datetime, timedelta
 from flask import current_app, redirect, url_for
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, between
 from app.extensions import db
 from app.models import ActivityLog
 
@@ -58,10 +58,13 @@ def register_callbacks(dashapp):
         """
         if start_date and end_date:
             query = ActivityLog.query.filter(
-                        or_(and_(ActivityLog.start_time >= start_date,
-                             ActivityLog.start_time <= end_date),
-                            and_(ActivityLog.stop_time >= start_date,
-                                 ActivityLog.stop_time <= end_date)))
+                    or_(and_(ActivityLog.start_time.__le__(start_date),
+                             or_(ActivityLog.stop_time.__eq__(None),
+                                 ActivityLog.stop_time.__gt__(end_date))),
+                        or_(ActivityLog.start_time.between(start_date, end_date),
+                            ActivityLog.stop_time.between(start_date, end_date))
+                        )
+                    )
             df = pd.read_sql(query.statement, db.session.bind,
                              parse_dates=['start_time', 'stop_time'],
                              index_col='id')
