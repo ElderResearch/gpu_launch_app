@@ -354,7 +354,6 @@ def launch(username, password=None, imagetype=None, imagetag="latest", num_gpus=
     # if the user has requested gpus, set the
     # proper runtime value and add an environment variable flag
     if num_gpus > 0:
-        imagedict['runtime'] = 'nvidia'
         # increasing shm_size to 8G. default if not set explicitly is 64M.
         # this prevents bus error when running pytorch in docker containers
         # see https://github.com/pytorch/pytorch/issues/2244
@@ -373,7 +372,10 @@ def launch(username, password=None, imagetype=None, imagetag="latest", num_gpus=
             'NVIDIA_VISIBLE_DEVICES',
             'none'
         )
-
+    
+    # use nvidia runtime to enable communication with the GPUs
+    imagedict['runtime'] = 'nvidia'
+    
     try:
         # look upon my kwargs hack and tremble. later dicts have priority
         container = client.containers.run(**{**imagedict, **volumes, **kwargs})
