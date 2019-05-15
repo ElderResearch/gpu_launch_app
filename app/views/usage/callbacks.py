@@ -65,9 +65,12 @@ def register_callbacks(dashapp):
             df = pd.read_sql(query.statement, db.session.bind,
                              parse_dates=['start_time', 'stop_time'],
                              index_col='id')
-            imputed_df = impute_stop_times(df)
-            trimmed_df = trim_start_stop(imputed_df, start_date, end_date)
-            return trimmed_df.to_json(date_format='iso', orient='split')
+            df = impute_stop_times(df)
+            df = trim_start_stop(df, start_date, end_date)
+            df['runtime'] = (df.stop_time - df.start_time).dt.total_seconds() / 3600
+            df['gpu_hours'] = df['runtime'] * df['num_gpus']
+
+            return df.to_json(date_format='iso', orient='split')
         else:
             pass
 
@@ -84,7 +87,8 @@ def register_callbacks(dashapp):
             data = []
             gp = pd.crosstab(df.username, df.image_type)
             for cname in gp.columns:
-                data.append(go.Bar(x=gp.index, y=gp[cname], name=cname, showlegend=False))
+                data.append(go.Bar(x=gp.index, y=gp[cname], name=cname, 
+                    showlegend=False, hoverinfo='y+name'))
             layout = go.Layout(barmode="stack")
 
             return [dcc.Graph(figure={"data": data, "layout": layout})]
@@ -107,11 +111,9 @@ def register_callbacks(dashapp):
             end_date = datetime.strptime(end_date, '%Y-%m-%d')
         df = pd.read_json(jsonified_data, orient='split')
         if df.shape[0] > 0:
-            used = ((df['stop_time'] - df['start_time']).dt.seconds * \
-                    df['num_gpus']).sum()
-            total = (end_date - start_date).total_seconds() * 4
+            poss_gpu_hrs = (end_date - start_date).total_seconds() / 3600 * 4
 
-            return "{:.0%}".format(used/total)
+            return "{:.0%}".format(df['gpu_hours'].sum()/poss_gpu_hrs)
 
 
     @dashapp.callback(Output('container-runtime-bar', 'children'),
@@ -123,9 +125,10 @@ def register_callbacks(dashapp):
         """
         df = pd.read_json(jsonified_data, orient='split')
         if df.shape[0] > 0:
-            df['runtime'] = df.stop_time - df.start_time
-            gp = df.groupby('username')['runtime'].sum().dt.total_seconds() / 3600
-            data = [go.Bar(x=gp.index, y=gp.values)]
+            gp = df.groupby('username')['runtime'].sum()
+            text = ['{:.2f}'.format(v) for v in gp.values]
+            data = [go.Bar(x=gp.index, y=gp.values.round(2),
+                hoverinfo='text', text=text)]
 
             return [dcc.Graph(figure={"data": data})]
 
@@ -144,10 +147,7 @@ def register_callbacks(dashapp):
         df = pd.read_json(jsonified_data, orient='split')
         HOURLY_COST = 3.06 # hourly cost of p3.2xlarge instance as of 22APR2019
         if df.shape[0] > 0:
-            df['runtime'] = df.stop_time - df.start_time
-            gpu_containers = df.loc[df.num_gpus > 0]
-            gpu_hours = gpu_containers['runtime'].sum().total_seconds() / 3600
-            cost = gpu_hours * HOURLY_COST
+            cost = df['gpu_hours'].sum() * HOURLY_COST
 
             return "${:0,.2f}".format(cost)
 
@@ -187,14 +187,13 @@ def register_callbacks(dashapp):
 
     @dashapp.callback(Output('total-hours', 'children'),
                       [Input('data-div', 'children')])
-    def total_containers(jsonified_data):
+    def total_hours(jsonified_data):
         """
         calculate total container runtime hours in selected time period
         """
         df = pd.read_json(jsonified_data, orient='split')
         if df.shape[0] > 0:
-            df['runtime'] = df.stop_time - df.start_time
-            total = df['runtime'].sum().total_seconds() / 3600
+            total = df['runtime'].sum()
 
             return ["{:.0f}".format(total)]
 
@@ -216,11 +215,11 @@ def register_callbacks(dashapp):
             end_date = datetime.strptime(end_date, '%Y-%m-%d')
         df = pd.read_json(jsonified_data, orient='split')
         if df.shape[0] > 0:
-            df['runtime'] = (df['stop_time'] - df['start_time']).dt.seconds
-            df['gpu_seconds'] = df['runtime'] * df['num_gpus']
-            total = (end_date - start_date).total_seconds() * 4
-            gp = df.groupby('username')['gpu_seconds'].sum() / total * 100
-            data = [go.Bar(x=gp.index, y=gp.values)]
+            poss_gpu_hrs = (end_date - start_date).total_seconds() / 3600 * 4
+            gp = df.groupby('username')['gpu_hours'].sum() / poss_gpu_hrs * 100
+            text = ['{:.2f}%'.format(v) for v in gp.values]
+            data = [go.Bar(x=gp.index, y=gp.values.round(2),
+                hoverinfo='text', text=text)]
 
             return [dcc.Graph(figure={"data": data})]
 
@@ -241,9 +240,7 @@ def register_callbacks(dashapp):
             end_date = datetime.strptime(end_date, '%Y-%m-%d')
         df = pd.read_json(jsonified_data, orient='split')
         if df.shape[0] > 0:
-            df['runtime'] = (df['stop_time'] - df['start_time']).dt.seconds
-            df['gpu_seconds'] = df['runtime'] * df['num_gpus']
-            gp = df.groupby('username')['gpu_seconds'].sum() / 3600
+            gp = df.groupby('username')['gpu_hours'].sum()
             data = [go.Pie(labels=gp.index, values=gp.values.round(1),
                            hoverinfo='label+percent', textinfo='value')]
 
