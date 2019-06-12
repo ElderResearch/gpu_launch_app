@@ -129,8 +129,10 @@ def register_callbacks(dashapp):
         df = pd.read_json(jsonified_data, orient='split')
         if df.shape[0] > 0:
             gp = df.groupby('username')['runtime'].sum()
+            gp = gp.round(2)
+            gp = gp.loc[gp.values > 0]
             text = ['{:.2f}'.format(v) for v in gp.values]
-            data = [go.Bar(x=gp.index, y=gp.values.round(2),
+            data = [go.Bar(x=gp.index, y=gp.values, 
                 hoverinfo='text', text=text)]
 
             return [dcc.Graph(figure={"data": data})]
@@ -220,8 +222,10 @@ def register_callbacks(dashapp):
         if df.shape[0] > 0:
             poss_gpu_hrs = (end_date - start_date).total_seconds() / 3600 * 4
             gp = df.groupby('username')['gpu_hours'].sum() / poss_gpu_hrs * 100
+            gp = gp.round(2)
+            gp = gp.loc[gp.values > 0]
             text = ['{:.2f}%'.format(v) for v in gp.values]
-            data = [go.Bar(x=gp.index, y=gp.values.round(2),
+            data = [go.Bar(x=gp.index, y=gp.values,
                 hoverinfo='text', text=text)]
 
             return [dcc.Graph(figure={"data": data})]
@@ -244,7 +248,9 @@ def register_callbacks(dashapp):
         df = pd.read_json(jsonified_data, orient='split')
         if df.shape[0] > 0:
             gp = df.groupby('username')['gpu_hours'].sum()
-            data = [go.Pie(labels=gp.index, values=gp.values.round(1),
+            gp = gp.round(1)
+            gp = gp.loc[gp.values > 0]
+            data = [go.Pie(labels=gp.index, values=gp.values,
                            hoverinfo='label+percent', textinfo='value')]
 
             return [dcc.Graph(figure={"data": data})]
