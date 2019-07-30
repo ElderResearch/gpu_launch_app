@@ -28,9 +28,11 @@ import hashlib
 import dateutil.parser
 import docker
 import notebook.auth
+from pathlib import Path
 import psutil
 import pytz
 from notebook.auth import passwd
+import yaml
 
 # ----------------------------- #
 #   Module Constants            #
@@ -40,20 +42,24 @@ HERE = os.path.dirname(os.path.realpath(__file__))
 
 INSTALLED_DEVICES = set(['0', '1', '2', '3'])
 
-ERI_IMAGES = {
-    'Python': {
-        'image': 'eri_dev:{tag}',
-        'auto_remove': True,
-        'detach': True,
-        'ports': {8888: 'auto'}
-    },
-    'Python+R': {
-        'image': 'eri_dev_p_r:{tag}',
-        'auto_remove': True,
-        'detach': True,
-        'ports': {8888: 'auto', 8787: 'auto'}
-    },
-}
+try:
+    with open(Path(__file__).resolve().parents[1] / 'images.yaml', 'r') as doc:
+        ERI_IMAGES = yaml.load(doc, yaml.Loader)
+except FileNotFoundError:
+    ERI_IMAGES = {
+        'Python': {
+            'image': 'eri_dev:{tag}', 
+            'auto_remove': True,
+            'detach': True,
+            'ports': {8888: 'auto'}
+        },
+        'Python+R': {
+            'image': 'eri_dev_p_r:{tag}',
+            'auto_remove': True,
+            'detach': True,
+            'ports': {8888: 'auto', 8787: 'auto'}
+        },
+    }
 
 JUPYTER_IMAGES = [
     k for (k, v) in ERI_IMAGES.items() if 8888 in v.get('ports', {})
@@ -238,7 +244,8 @@ def _find_open_port(start=8890, stop=9000):
     )
 
 
-def launch(username, password=None, imagetype=None, imagetag="latest", num_gpus=0, **kwargs):
+def launch(username, password=None, password_hash=None, imagetype=None,
+           imagetag="latest", num_gpus=0, **kwargs):
     """launch a docker container for user `username` of type `imagetype`
 
     args:
@@ -275,7 +282,7 @@ def launch(username, password=None, imagetype=None, imagetag="latest", num_gpus=
 
     # validate linux username/password
     # prevents users from launching containers as "astewart"
-    if not pam.authenticate(username, password):
+    if password_hash is None and not pam.authenticate(username, password):
         msg = ("Incorrect username or password. Or user was not configured properly "
                "Try username/password again. If error persists, contact admins")
         return _error(msg)
@@ -301,22 +308,26 @@ def launch(username, password=None, imagetype=None, imagetag="latest", num_gpus=
 
     # add image type to container labels
     imagedict['labels'] = {'image_type': imagetype}
-    
+
     # add image tag
     imagedict['image'] = imagedict['image'].format(tag=imagetag)
 
     # take care of some of the jupyter notebook specific steps
+    # TODO: Change these to accept password hash instead of plain text password
     if imagetype in JUPYTER_IMAGES:
         # hash the linux password using notebook.auth.passwd()
         # the neighboring jupyter_notebook_config.py file will look for an
         # environment variable PASSWORD, so we need to set that in our container
-        _update_environment(imagedict, 'PASSWORD', passwd(password))
+        _update_environment(imagedict, 'PASSWORD',
+                            password_hash or passwd(password))
 
         # hash the linux password and store as environment variable
         # used to connect local IDEs (e.g., atom, vscode) to remote jupyter sessions
         h = hashlib.new('sha256')
-        h.update(password.encode())
-        _update_environment(imagedict, 'JUPYTERTOKEN', h.hexdigest())
+        _update_environment(
+            imagedict, 'JUPYTERTOKEN',
+            password_hash or h.update(password.encode()).hexdigest()
+        )
 
         # update ports dictionary for this instance if this is an auto
         if imagedict['ports'][8888] == 'auto':
@@ -372,10 +383,10 @@ def launch(username, password=None, imagetype=None, imagetag="latest", num_gpus=
             'NVIDIA_VISIBLE_DEVICES',
             'none'
         )
-    
+
     # use nvidia runtime to enable communication with the GPUs
     imagedict['runtime'] = 'nvidia'
-    
+
     try:
         # look upon my kwargs hack and tremble. later dicts have priority
         container = client.containers.run(**{**imagedict, **volumes, **kwargs})
@@ -460,4 +471,3 @@ if __name__ == '__main__':
         imagetag=args.imagetag,
         num_gpus=args.numgpus
     )
-

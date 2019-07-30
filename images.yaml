@@ -1,0 +1,26 @@
+Python:
+    image: eri_dev:{tag}
+    auto_remove: True
+    detach: True
+    ports:
+        8888: auto
+Python+R:
+    image: eri_dev_p_r:{tag}
+    auto_remove: true
+    detach: true
+    ports:
+        8888: auto
+        8787: auto
+Chill:
+    image: chill:{tag}
+    auto_remove: true
+    detach: true
+    ports:
+        8888: auto
+Aegir:
+    image: aegir:{tag}
+    auto_remove: true
+    detach: true
+    ports:
+        8888: auto
+        8787: auto

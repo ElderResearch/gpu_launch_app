@@ -1,11 +1,10 @@
 {% extends "layout.html" %}
 {% block body %}
-<h1>gpu session launcher</h1>
 <div id="current-sessions">
     <p>first time users: see <a href="/#information">information section</a> below</p>
     <p>for reservations, see the <a href="/#gpu-calendar">calendar section</a> below</p>
     <p>to view usage statistics, <a href="/usage">click here</a> <span class="badge badge-info">NEW</span></p>
-    <h2>currently active sessions</h2>
+    <h2>active sessions</h2>
     <div>
         <table class="table table-striped table-sm">
             <thead>
@@ -35,22 +34,6 @@
 <div id="session-launcher-form">
     <h2>launch a gpu session</h2>
     <form action="/createSession" method="POST">
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="create-username" class="col-form-label">
-                    User Name
-                </label>
-                <input type="text" class="form-control" id="create-username" name="username" placeholder="enter username">
-		<small>must be a valid linux username on the gpu machine</small>
-            </div>
-            <div class="form-group col-md-6">
-                <label for="create-password" class="col-form-label">
-                    Password
-                </label>
-                <input type="password" class="form-control" id="create-password" name="password" placeholder="enter password">
-		<small><b>this is your gpu-box login password!</b> it is used to login to your <code>jupyter notebook</code><br />and as authentication for killing your container</small>
-            </div>
-        </div>
     	<div class="form-row">
             <div class="form-group col-md-6">
                 <label for="create-imagetype" class="col-form-label">
@@ -113,5 +96,5 @@
 
 {% for x in launched_sessions %}
 	{% include "_kill_session_modal.html" %}
-    {% endfor %}
+{% endfor %}
 {% endblock %}

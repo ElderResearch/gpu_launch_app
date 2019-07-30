@@ -26,15 +26,6 @@
 
         <script type="text/javascript">
             $(document).ready(function(){
-                $("#create-username").tooltip({
-                    placement:"top",
-                    html: true
-                });
-
-                $("#create-password").tooltip({
-                    placement:"top",
-                    html: true
-                });
 
                 $("#create-imagetype").tooltip({
                     placement:"top",
@@ -56,6 +47,28 @@
         </style>
     </head>
     <body>
+        {% block navbar %}
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+          <a class="navbar-brand" href="{{ url_for('home.index') }}">gpu session launcher</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="/usage">Dashboard</a>
+              </li>
+              {% if not current_user.is_anonymous %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('home.logout') }}">Logout</a>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </nav>
+        {% endblock %}
+
         <div class="container">
             <div id="flash-messages">
                 {% with messages = get_flashed_messages(with_categories=true) %}

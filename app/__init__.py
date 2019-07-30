@@ -56,21 +56,24 @@ def register_dashapps(server):
     register_callbacks(usageapp)
 
 def register_extensions(server):
-    from .extensions import db
-    from .extensions import migrate
+    from .extensions import db, migrate, login
     from .helpers import generate_usage_log_data
     from .models import ActivityLog
     db.init_app(server)
     with server.app_context():
-        db.create_all()
         if os.getenv('FLASK_ENV') == 'development' and 'DATABASE_URL' not in os.environ:
+            db.create_all()
             rows = generate_usage_log_data(ActivityLog)
             db.session.add_all(rows)
             try:
                 db.session.commit()
             except:
                 db.session.rollback()
-    migrate.init_app(server, db)
+    migrate.init_app(server, db, directory=os.path.join(
+        os.path.dirname(__file__), 'migrations'))
+    login.init_app(server)
+    login.login_view = 'home.login'
+    login.login_message = ''
 
 def register_blueprints(server):
     from .views.home import home
