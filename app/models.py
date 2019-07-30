@@ -3,7 +3,6 @@
 from datetime import datetime
 import grp
 from flask_login import UserMixin
-import pam
 from notebook.auth.security import passwd, passwd_check
 from .extensions import db, login
 

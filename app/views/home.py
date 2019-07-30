@@ -1,8 +1,5 @@
 from datetime import datetime
-import hashlib
-import os
 import pam
-from notebook.auth.security import passwd, passwd_check
 from urllib.parse import urlparse
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for

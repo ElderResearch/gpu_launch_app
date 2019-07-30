@@ -14,7 +14,6 @@ Usage:
 """
 
 import argparse
-import collections
 import copy
 import datetime
 import hashlib
@@ -23,11 +22,9 @@ import os
 import pwd
 import pam
 import getpass
-import hashlib
 
 import dateutil.parser
 import docker
-import notebook.auth
 from pathlib import Path
 import psutil
 import pytz
