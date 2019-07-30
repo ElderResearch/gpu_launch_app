@@ -3,13 +3,10 @@
 import docker
 import pandas as pd
 import dash_core_components as dcc
-import dash_html_components as html
-import dash_daq as daq
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
 from dash.dependencies import Input, Output, State
 from datetime import datetime, timedelta
-from flask import current_app, redirect, url_for
 from sqlalchemy import and_, or_, between
 from app.extensions import db
 from app.models import ActivityLog
@@ -169,6 +166,7 @@ def register_callbacks(dashapp):
             df.rename(columns={'username': 'Task', 'start_time': 'Start',
                                'stop_time': 'Finish', 'image_type': 'Resource'},
                       inplace=True)
+            df['Description'] = df['Resource']
             figure = ff.create_gantt(df=df, index_col='Resource',
                                      group_tasks=True, showgrid_x=True,
                                      showgrid_y=True, width='100%', title='')

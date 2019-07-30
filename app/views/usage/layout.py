@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
 import dash_core_components as dcc
-import dash_daq as daq
 import dash_html_components as html
 from datetime import date, datetime, timedelta
-from flask import url_for
 
 def key_metric_card(id, title, default_value='', subtext=''):
     return html.Div([
