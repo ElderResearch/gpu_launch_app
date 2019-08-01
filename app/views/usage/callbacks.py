@@ -8,7 +8,7 @@ import plotly.figure_factory as ff
 from dash.dependencies import Input, Output, State
 from datetime import datetime, timedelta
 from sqlalchemy import and_, or_, between
-from app.extensions import db
+from app.extensions import db, cache
 from app.models import ActivityLog
 
 def impute_stop_times(raw_data):
@@ -48,6 +48,7 @@ def register_callbacks(dashapp):
     @dashapp.callback(Output('data-div', 'children'),
                       [Input('date-picker-range', 'start_date'),
                        Input('date-picker-range', 'end_date')])
+    @cache.memoize()
     def data_query(start_date, end_date):
         """
         Read activity log table and filter results by selected date range.
@@ -77,6 +78,7 @@ def register_callbacks(dashapp):
 
     @dashapp.callback(Output('launched-containers-bar', 'children'),
                       [Input('data-div', 'children')])
+    @cache.memoize()
     def launched_containers_bar(jsonified_data):
         """
         create stacked bar chart counting number of launched containers
@@ -98,6 +100,7 @@ def register_callbacks(dashapp):
                       [Input('data-div', 'children')],
                       [State('date-picker-range', 'start_date'),
                        State('date-picker-range', 'end_date')])
+    @cache.memoize()
     def gpu_utilization(jsonified_data, start_date, end_date):
         """
         calculate utilization rate of the GPUs over the selected time period
@@ -118,6 +121,7 @@ def register_callbacks(dashapp):
 
     @dashapp.callback(Output('container-runtime-bar', 'children'),
                       [Input('data-div', 'children')])
+    @cache.memoize()
     def container_runtime_bar(jsonified_data):
         """
         create bar chart of total container runtime in hours
@@ -137,6 +141,7 @@ def register_callbacks(dashapp):
 
     @dashapp.callback(Output('aws-cost', 'children'),
                       [Input('data-div', 'children')])
+    @cache.memoize()
     def aws_cost_comparison(jsonified_data):
         """
         calculate the total cost of GPU utilization if run on AWS
@@ -156,6 +161,7 @@ def register_callbacks(dashapp):
 
     @dashapp.callback(Output('container-gantt-chart', 'children'),
                       [Input('data-div', 'children')])
+    @cache.memoize()
     def container_gantt_chart(jsonified_data):
         """
         create a gantt chart showing a timeline of launched containers
@@ -179,6 +185,7 @@ def register_callbacks(dashapp):
 
     @dashapp.callback(Output('total-containers', 'children'),
                       [Input('data-div', 'children')])
+    @cache.memoize()
     def total_containers(jsonified_data):
         """
         calculate total number of launched containers in selected time period
@@ -190,6 +197,7 @@ def register_callbacks(dashapp):
 
     @dashapp.callback(Output('total-hours', 'children'),
                       [Input('data-div', 'children')])
+    @cache.memoize()
     def total_hours(jsonified_data):
         """
         calculate total container runtime hours in selected time period
@@ -205,6 +213,7 @@ def register_callbacks(dashapp):
                       [Input('data-div', 'children')],
                       [State('date-picker-range', 'start_date'),
                        State('date-picker-range', 'end_date')])
+    @cache.memoize()
     def gpu_utilization_bar(jsonified_data, start_date, end_date):
         """
         calculate utilization rate of the GPUs over the selected time period
@@ -233,6 +242,7 @@ def register_callbacks(dashapp):
                       [Input('data-div', 'children')],
                       [State('date-picker-range', 'start_date'),
                        State('date-picker-range', 'end_date')])
+    @cache.memoize()
     def gpu_utilization_pie(jsonified_data, start_date, end_date):
         """
         calculate absolute utilization of the GPUs over the selected time period

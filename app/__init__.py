@@ -37,27 +37,26 @@ def register_dashapps(server):
             "href": "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css",
             "integrity": "sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T",
             "crossorigin": "anonymous"
-        },
-        {
-            "rel": "stylesheet",
-            "href": "https://codepen.io/semperstew/pen/gJpMQN.css",
-            "crossorigin": "anonymous"
         }
     ]
     usageapp = dash.Dash(__name__,
                          server=server,
                          url_base_pathname='/usage/',
                          external_stylesheets=external_stylesheets,
-                         meta_tags=[meta_viewport])
+                         meta_tags=[meta_viewport],
+                         serve_locally=False)
 
     usageapp.title = 'Usage Dashboard'
     usageapp.layout = layout
     register_callbacks(usageapp)
 
 def register_extensions(server):
-    from .extensions import db, migrate, login
+    from .extensions import db, migrate, login, cache
     from .helpers import generate_usage_log_data
     from .models import ActivityLog
+    cache.init_app(server)
+    with server.app_context():
+        cache.clear()
     db.init_app(server)
     with server.app_context():
         if os.getenv('FLASK_ENV') == 'development' and 'DATABASE_URL' not in os.environ:
