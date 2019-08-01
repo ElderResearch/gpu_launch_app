@@ -5,3 +5,4 @@
 *__pycache__/
 .env
 images.yaml
+cache/
