@@ -4,8 +4,9 @@ from urllib.parse import urlparse
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user, login_required
+from .usage.callbacks import data_query
 from .. import launch
-from ..extensions import db
+from ..extensions import db, cache
 from ..forms import LoginForm
 from ..models import ActivityLog, User
 
@@ -75,6 +76,7 @@ def create_session():
                         image_type=resp['imagetype'], num_gpus=resp['num_gpus'])
     db.session.add(entry)
     db.session.commit()
+    cache.delete_memoized(data_query)
     return redirect(url_for('home.index'))
 
 
@@ -97,7 +99,7 @@ def kill_session():
                 return redirect(url_for('home.index'))
             entry.stop()
             db.session.commit()
-
+            cache.delete_memoized(data_query)
             flash(
                 message="docker container {} killed successfully".format(
                     request.form['docker_id'][:10]

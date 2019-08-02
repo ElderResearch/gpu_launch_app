@@ -69,7 +69,7 @@ body = html.Div([
                    title='GPU Utilization Rate per User'),
     ], className='card-deck text-center'),
 
-    html.Div(id='data-div', style={'display': 'none'})
+    html.Div(id='signal-div', style={'display': 'none'})
 ], className='container')
 
 layout = html.Div([navbar, body], id='main-div')
