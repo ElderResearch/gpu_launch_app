@@ -45,16 +45,16 @@ try:
 except FileNotFoundError:
     ERI_IMAGES = {
         'Python': {
-            'image': 'eri_dev:{tag}', 
+            'image': 'eri_dev:{tag}',
             'auto_remove': True,
             'detach': True,
-            'ports': {8888: 'auto'}
+            'ports': {8888: 'auto', 8008: 'auto'}
         },
         'Python+R': {
             'image': 'eri_dev_p_r:{tag}',
             'auto_remove': True,
             'detach': True,
-            'ports': {8888: 'auto', 8787: 'auto'}
+            'ports': {8888: 'auto', 8787: 'auto', 8008: 'auto'}
         },
     }
 
@@ -308,6 +308,15 @@ def launch(username, password=None, password_hash=None, imagetype=None,
 
     # add image tag
     imagedict['image'] = imagedict['image'].format(tag=imagetag)
+
+    # update ports dictionary for tensorboard
+    if imagedict['ports'][8008] == 'auto':
+        # have to find the first port over 8009 that is open
+        port, msg = _find_open_port(start=8010, stop=8030)
+        if not port:
+            return _error(msg)
+
+        imagedict['ports'][8008] = port
 
     # take care of some of the jupyter notebook specific steps
     # TODO: Change these to accept password hash instead of plain text password
