@@ -156,9 +156,10 @@ def active_eri_images(client=None, ignore_other_images=False):
                 c.attrs['HostConfig']['PortBindings']['8888/tcp'][0]['HostPort']
             )
 
-            d['tensorboard_port'] = int(
-                c.attrs['HostConfig']['PortBindings']['8008/tcp'][0]['HostPort']
-            )
+            if c.attrs['HostConfig']['PortBindings'].get('8008/tcp'):
+                d['tensorboard_port'] = int(
+                    c.attrs['HostConfig']['PortBindings']['8008/tcp'][0]['HostPort']
+                )
 
 
         if imagetype in R_IMAGES:

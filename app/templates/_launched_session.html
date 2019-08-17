@@ -6,7 +6,11 @@
   <td>{{ x.uptime }}</td>
 	{% if x.username == current_user.username or current_user.is_admin() %}
 		<td><a class="btn btn-info btn-sm" href="{{ container_url(x.jupyter_port) }}" target="_blank">launch jupyter</a></td>
+		{% if x.tensorboard_port %}
 		<td><a class="btn btn-info btn-sm" href="{{ container_url(x.tensorboard_port) }}" target="_blank">launch jupyter</a></td>
+		{% else %}
+		<td></td>
+		{% endif %}
 		{% if x.rstudio_port %}
 		    <td><a class="btn btn-info btn-sm" href="{{ container_url(x.rstudio_port) }}" target="_blank">launch rstudio</a></td>
 		{% else %}
