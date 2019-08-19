@@ -5,11 +5,6 @@ bleach==3.1.1
 certifi==2019.3.9
 chardet==3.0.4
 Click==7.0
-dash==1.0.2
-dash-core-components==1.0.0
-dash-html-components==1.0.0
-dash-renderer==1.0.0
-dash-table==4.0.2
 decorator==4.4.0
 defusedxml==0.5.0
 docker==3.3.0
@@ -43,7 +38,6 @@ pandocfilters==1.4.2
 parso==0.4.0
 pexpect==4.7.0
 pickleshare==0.7.5
-plotly==3.6.1
 prometheus-client==0.6.0
 prompt-toolkit==2.0.9
 psutil==5.5.1
