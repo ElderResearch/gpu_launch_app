@@ -4,11 +4,11 @@ from urllib.parse import urlparse
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user, login_required
-from .usage.callbacks import data_query
 from .. import launch
 from ..extensions import db, cache
 from ..forms import LoginForm
 from ..models import ActivityLog, User
+from ..helpers import data_query
 
 FLASH_CLS = {
     'error': "alert alert-danger",
@@ -153,6 +153,16 @@ def login():
         else:
             flash(message="All fields required.", category=FLASH_CLS['error'])
     return render_template('login.html', form=form)
+
+@home.route('/dashboard', methods=["GET"])
+def dashboard():
+    return render_template('dashboard.html')
+
+@home.route('/data', methods=["GET"])
+def data():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    return data_query(start_date, end_date)
 
 @home.route('/logout')
 def logout():
