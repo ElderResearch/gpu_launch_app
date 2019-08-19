@@ -155,10 +155,12 @@ def login():
     return render_template('login.html', form=form)
 
 @home.route('/dashboard', methods=["GET"])
+@login_required
 def dashboard():
     return render_template('dashboard.html')
 
 @home.route('/data', methods=["GET"])
+@login_required
 def data():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
