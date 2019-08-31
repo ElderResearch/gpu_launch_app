@@ -316,7 +316,7 @@ def launch(username, password=None, password_hash=None, imagetype=None,
     imagedict['image'] = imagedict['image'].format(tag=imagetag)
 
     # update ports dictionary for tensorboard
-    if imagedict['ports'][8008] == 'auto':
+    if imagedict['ports'].get(8008) == 'auto':
         # have to find the first port over 8009 that is open
         port, msg = _find_open_port(start=8010, stop=8030)
         if not port:
