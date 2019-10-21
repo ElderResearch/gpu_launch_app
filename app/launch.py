@@ -254,6 +254,7 @@ def launch(username, password=None, password_hash=None, imagetype=None,
     args:
         username (str): linux user name, used for mounting home directories
         password (str): linux password
+        password_hash (str): pre-hashed password (from webapp login page)
         imagetype (str): module-specific enumeration of available images
             (default: 'Python', which points to docker image `eri_dev`)
         imagetag (str): the docker tag of the image to launch (default: 'latest')
@@ -285,7 +286,7 @@ def launch(username, password=None, password_hash=None, imagetype=None,
 
     # validate linux username/password
     # prevents users from launching containers as "astewart"
-    if password_hash is None and not pam.authenticate(username, password):
+    if not password_hash and not pam.authenticate(username, password):
         msg = ("Incorrect username or password. Or user was not configured properly "
                "Try username/password again. If error persists, contact admins")
         return _error(msg)
@@ -325,7 +326,6 @@ def launch(username, password=None, password_hash=None, imagetype=None,
         imagedict['ports'][8008] = port
 
     # take care of some of the jupyter notebook specific steps
-    # TODO: Change these to accept password hash instead of plain text password
     if imagetype in JUPYTER_IMAGES:
         # hash the linux password using notebook.auth.passwd()
         # the neighboring jupyter_notebook_config.py file will look for an
@@ -333,13 +333,23 @@ def launch(username, password=None, password_hash=None, imagetype=None,
         _update_environment(imagedict, 'PASSWORD',
                             password_hash or passwd(password))
 
-        # hash the linux password and store as environment variable
-        # used to connect local IDEs (e.g., atom, vscode) to remote jupyter sessions
-        h = hashlib.new('sha256')
-        _update_environment(
-            imagedict, 'JUPYTERTOKEN',
-            password_hash or h.update(password.encode()).hexdigest()
-        )
+        # if container launched from webapp, set Jupytertoken to Jupyter hashed password
+        # else, if launched from CLI, hash system (linux) password and set as Jupytertoken
+        # CLI launch will always produce the same hash - useful for connecting from local IDE
+        if password_hash:
+            _update_environment(
+                imagedict,
+                'JUPYTERTOKEN',
+                password_hash
+            )
+        else:
+            h = hashlib.new('sha256')
+            h.update(password.encode())
+            _update_environment(
+                imagedict,
+                'JUPYTERTOKEN',
+                h.hexdigest()
+            )
 
         # update ports dictionary for this instance if this is an auto
         if imagedict['ports'][8888] == 'auto':
@@ -465,7 +475,6 @@ def parse_args():
     parser.add_argument("-g", "--numgpus", help=num_gpus, default=0)
 
     return parser.parse_args()
-
 
 if __name__ == '__main__':
     args = parse_args()
