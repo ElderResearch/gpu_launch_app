@@ -1,40 +1,29 @@
 # Connecting `Atom` or `Vscode` to remote Jupyter Kernels
 
-## Hash Linux Password
+## Get Jupyter Token
 
-Hash your linux password using SHA256. The following Python script will print out your password hash. Save the hash somewhere convenient - this hash will be the same until your Linux password changes. 
-```python
-# can be run as script or copy/pasted interactively
-import getpass
-import hashlib
-
-def hash_pwd():
-    h = hashlib.new('sha256')
-    h.update(getpass.getpass().encode())
-    return h.hexdigest()
-
-if __name__ == "__main__":
-    print(hash_pwd())
-```
+1. Start a python session on eri-gpu.cho.elderresearch.com
+2. Log in to Jupyter Lab
+3. Open a terminal in Jupyter Lab and type `env`
+4. Copy/paste the `JUPYTERTOKEN` environment variable (including `sha1` part)
 
 ## Setup Vscode
 
 1. Install the Python [extention](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 
-2. Launch a Python session using the [GPU front end](http://eri-gpu.cho.elderresearch.com/)
+2. Configure Vscode to connect to a remote Jupyter Kernel:
+[Official Instructions](https://code.visualstudio.com/docs/python/jupyter-support#_connect-to-a-remote-jupyter-server)    
 
-3. Configure Vscode to connect to a remote Jupyter Kernel - [Official Instructions](https://code.visualstudio.com/docs/python/jupyter-support#_connect-to-a-remote-jupyter-server)    
-
-Alternate remote kernel configuation instructions:   
+ERI Instructions:   
 - Create a Vscode Workspace (typically a `git` repository)
-- Open the Vscode Workspace settings (Code --> Preferences --> Settings --> Workspace Tab)
-- Type "Python URI" into the settings search
-- Enter the URL: `http://eri-gpu.cho.elderresearch.com:<PORT>/?token=<LINUX PASSWORD HASH>`
+- Open the Vscode Workspace settings (Code --> Preferences --> Settings --> **Workspace Tab**)
+- Type "Jupyter Server URI" into the settings search
+- Enter the URL: `http://eri-gpu.cho.elderresearch.com:<PORT>/?token=<JUPYTERTOKEN>`
 
-This will create the following file in your workspace `.vscode/settings.json` that looks like:
+This will create the following file in your workspace `.vscode/settings.json` (shown below). This must be changed each time you start a new session on the GPU box. NOTE! Unless you want to always connect to a remote Jupyter kernel, you should ensure this is only applied to your workspace settings.  
 ```json
 {
-    "python.dataScience.jupyterServerURI": "http://eri-gpu.cho.elderresearch.com:<PORT>/?token=<LINUX PASSWORD HASH>",
+    "python.dataScience.jupyterServerURI": "http://eri-gpu.cho.elderresearch.com:<PORT>/?token=<JUPYTERTOKEN>",
     // "python.dataScience.jupyterServerURI": "local",
     "python.pythonPath": "/usr/local/anaconda3/bin/python"
 }
@@ -56,12 +45,9 @@ print(os.getcwd())
 
 2. install the `Ipython` [Kernel](https://nteract.io/kernels)
 
-3. launch a Python session using the [GPU front end](http://eri-gpu.cho.elderresearch.com/)
-https://nteract.gitbooks.io/hydrogen/docs/Usage/RemoteKernelConnection.html
+3. Configure Atom to connect to a remote kernel - [Official Instructions](https://nteract.gitbooks.io/hydrogen/docs/Usage/RemoteKernelConnection.html)
 
-4. Configure Atom to connect to a remote kernel - [Official Instructions](https://nteract.gitbooks.io/hydrogen/docs/Usage/RemoteKernelConnection.html)
-
-Detailed configuration instructions:
+ERI instructions:
 - Open Preferences --> Packages --> Click Hydrogen Settings --> Scroll Down to "Kernel Gateways"
 - Enter the following into the box:
 ```
@@ -69,7 +55,7 @@ Detailed configuration instructions:
   "name": "GPU Box",
   "options": {
     "baseUrl": "http://eri-gpu.cho.elderresearch.com:<PORT>",
-    "token": "<HASHED LINUX PASSWORD>"
+    "token": "<JUPYTERTOKEN>"
   }
 }]
 ```
