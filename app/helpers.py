@@ -56,7 +56,7 @@ def trim_start_stop(raw_data, start_date, end_date):
     trim the container start and/or stop times to fit in the selected date range
     """
     df = raw_data.copy()
-    df.loc[df.start_time < start_date, 'start_time'] = start_date
+    df.loc[(df.start_time < start_date)&(df.stop_time > start_date), 'start_time'] = start_date
     df.loc[df.stop_time > end_date, 'stop_time'] = end_date
 
     return df
