@@ -1,3 +1,11 @@
+function roundDay(timestamp){
+    timestamp.setHours(0);
+    timestamp.setMinutes(0);
+    timestamp.setSeconds(0);
+    timestamp.setMilliseconds(0);
+    return timestamp;
+};
+
 // Date range start date
 $('#start-date').datepicker({
     weekStart: 1,
@@ -6,10 +14,10 @@ $('#start-date').datepicker({
     todayHighlight: true,
     format: "mm/dd/yyyy",
     startDate: "03-02-2019",
-    endDate: new Date()
+    endDate: roundDay(new Date())
   }
   ).datepicker(
-    'setUTCDate', new Date(new Date().setMonth(new Date().getMonth()-1))
+    'setUTCDate', roundDay(new Date(new Date().setMonth(new Date().getMonth()-1)))
   ).on('hide', function(e) {
     // update the minimum selectable end-date
     $('#end-date').datepicker('setStartDate', e.date);
@@ -53,7 +61,7 @@ function queryActivityLog(startDate, endDate) {
 
     // update total runtime hours key metric
     $('#runtime-hours-metric').html(
-      Math.round(d3.sum(json, d => {return d.runtime})));
+      Math.round(d3.sum(json, d => d.runtime)));
 
     // update gpu utilization metric
     $('#gpu-utilization-metric').html(
