@@ -31,7 +31,7 @@ def generate_usage_log_data(Model, n=100):
 
     return containers
 
-def impute_stop_times(raw_data):
+def impute_stop_times(raw_data, start_date):
     """
     fill in missing container stop times.
 
@@ -49,6 +49,8 @@ def impute_stop_times(raw_data):
         else:
             df.loc[idx, 'stop_time'] = df.loc[idx, 'start_time'] + \
                     timedelta(days=1)
+
+    df = df.loc[df['stop_time'] > start_date]
     return df
 
 def trim_start_stop(raw_data, start_date, end_date):
@@ -80,10 +82,10 @@ def data_query(start_date, end_date, impute_dates=True, trim_dates=True):
                      parse_dates=['start_time', 'stop_time'],
                      index_col='id')
     if impute_dates:
-        df = impute_stop_times(df)
+        df = impute_stop_times(df, start_date)
     if trim_dates:
         df = trim_start_stop(df, start_date, end_date)
     df['runtime'] = (df.stop_time - df.start_time).dt.total_seconds() / 3600
     df['gpu_hours'] = df['runtime'] * df['num_gpus']
-    #return df
+    
     return df.to_json(orient='records', date_format='iso')
