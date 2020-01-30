@@ -66,48 +66,45 @@ function queryActivityLog(startDate, endDate) {
     // update gpu utilization metric
     $('#gpu-utilization-metric').html(
       Math.round(
-        d3.sum(json, d => {return d.gpu_hours}) / d3.sum(json, d => {return d.runtime}) * 100) + "%");
+        d3.sum(json, d => d.gpu_hours) / d3.sum(json, d => d.runtime) * 100) + "%");
 
     // update AWS savings metric
     let awsCost = 3.06
     $('#aws-savings-metric').html(
-      "$" + (d3.sum(json, d => {return d.gpu_hours}) * awsCost).toFixed(2)
+      "$" + (d3.sum(json, d => d.gpu_hours) * awsCost).toFixed(2)
     )
     // update runtime bar graph
     resetChart(runtimeBar);
     (d3.nest()
-    .key(function(d) {return d.username})
-    .rollup(function(v) {return d3.sum(v, function(d) {return d.runtime})})
+    .key(d => d.username)
+    .rollup(v => d3.sum(v, d => d.runtime))
     .entries(json))
-    .sort((a,b)=>{return b.value - a.value})
-    .map(obj=>{addData(runtimeBar, obj.key, obj.value.toFixed(2))});
+    .sort((a,b) => {return b.value - a.value;})
+    .map(o => addData(runtimeBar, o.key, o.value.toFixed(2)));
 
     // update gpu usage pie graph
     resetChart(gpuUsagePie);
     (d3.nest()
-    .key(function(d) {return d.username})
-    .rollup(function(v) {return d3.sum(v, function(d) {return d.gpu_hours})})
+    .key(d => d.username)
+    .rollup(v => d3.sum(v, d => d.gpu_hours))
     .entries(json))
-    .filter(d=>{ return d.value > 0; })
-    .sort((a,b)=>{return b.value - a.value})
-    .map(obj=>{addData(gpuUsagePie, obj.key, obj.value.toFixed(2))});
+    .filter(d => {return d.value > 0;})
+    .sort((a,b) => {return b.value - a.value;})
+    .map(o => addData(gpuUsagePie, o.key, o.value.toFixed(2)));
 
     // update gpu utilization bar
     resetChart(utilizationBar);
     (d3.nest()
-    .key(function(d) {return d.username})
-    .rollup(function(v) {return {
-      gpu_hours: d3.sum(v, function(d) {return d.gpu_hours}),
-      total_hours: d3.sum(v, function(d) {return d.runtime})
-    }
-    })
-    .entries(json)).map(d=>{return {
+    .key(d => d.username)
+    .rollup(v => {return {
+      gpu_hours: d3.sum(v, d => d.gpu_hours),
+      total_hours: d3.sum(v, d => d.runtime)}})
+    .entries(json)).map(d => {return {
       key: d.key,
-      value: d.value.gpu_hours / d.value.total_hours * 100
-    }})
-    .filter(d=>{ return d.value > 0; })
-    .sort((a,b)=>{ return b.value - a.value; })
-    .map(obj=>{addData(utilizationBar, obj.key, obj.value.toFixed(2))});
+      value: d.value.gpu_hours / d.value.total_hours * 100}})
+    .filter(d => { return d.value > 0; })
+    .sort((a,b) => { return b.value - a.value; })
+    .map(o =>{addData(utilizationBar, o.key, o.value.toFixed(2))});
   })
 };
 
