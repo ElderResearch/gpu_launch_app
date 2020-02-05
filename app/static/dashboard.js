@@ -105,6 +105,39 @@ function queryActivityLog(startDate, endDate) {
     .filter(d => { return d.value > 0; })
     .sort((a,b) => { return b.value - a.value; })
     .map(o =>{addData(utilizationBar, o.key, o.value.toFixed(2))});
+
+    // update containers bar
+    resetChart(containersBar);
+    let images = json.reduce((arr, val) => {
+        arr.push(val.image_type); return arr;}, [])
+      .filter((value,index,self) => {return self.indexOf(value) === index;})
+      .sort();
+
+    let revImages = images.reverse();
+
+    let users = json.reduce((arr, val) => {
+        arr.push(val.username); return arr;}, [])
+      .filter((value,index,self) => {return self.indexOf(value) === index;})
+      .sort();
+    
+    let datasets = new Map(images.map(d=>{return [d,[]]}));
+
+    (d3.nest()
+    .key(d => d.username)
+    .sortKeys(d3.ascending)
+    .entries(json)).map(function(d) {
+        var counts = d3.nest()
+             .key(o => o.image_type)
+             .rollup(o => o.length)
+             .map(d.values);
+        return {key: d.key,
+                values: images.map(i => {
+                  return counts.get(i) || 0})
+                };
+              })
+    //.filter(d => { return d.value > 0; })
+    //.sort((a,b) => { return b.value - a.value; })
+    //.map(o =>{addData(utilizationBar, o.key, o.value.toFixed(2))});
   })
 };
 
