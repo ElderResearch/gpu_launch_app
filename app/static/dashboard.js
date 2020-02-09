@@ -108,46 +108,52 @@ function queryActivityLog(startDate, endDate) {
 
     // update containers bar
     resetChart(containersBar);
-    let images = json.reduce((arr, val) => {
+    var images = json.reduce((arr, val) => {
         arr.push(val.image_type); return arr;}, [])
       .filter((value,index,self) => {return self.indexOf(value) === index;})
       .sort();
-
-    let revImages = images.reverse();
-
-    let users = json.reduce((arr, val) => {
-        arr.push(val.username); return arr;}, [])
-      .filter((value,index,self) => {return self.indexOf(value) === index;})
-      .sort();
     
-    let datasets = new Map(images.map(d=>{return [d,[]]}));
-
-    (d3.nest()
+    var users = d3.nest()
+    .key(d=>d.username)
+    .rollup(d=>d.length)
+    .entries(json)
+    .sort((a,b)=>{return b.value - a.value})
+    .reduce((arr,d)=>(arr.push(d.key),arr),[]);
+    
+    var intermediate = (d3.nest()
     .key(d => d.username)
-    .sortKeys(d3.ascending)
-    .entries(json)).map(function(d) {
+    .entries(json))
+    .sort((a,b)=>{return users.indexOf(a.key) - users.indexOf(b.key)})
+    .map(function(d) {
         var counts = d3.nest()
              .key(o => o.image_type)
              .rollup(o => o.length)
              .map(d.values);
         return {key: d.key,
-                values: images.map(i => {
-                  return counts.get(i) || 0})
-                };
-              })
-    //.filter(d => { return d.value > 0; })
-    //.sort((a,b) => { return b.value - a.value; })
-    //.map(o =>{addData(utilizationBar, o.key, o.value.toFixed(2))});
-  })
+          values: images.reduce((obj,img) => (
+            obj[img] = counts.get(img) || 0, obj), {})
+          };
+        })
+    
+    containersBar.data.labels = users;
+
+    containersBar.data.datasets = images.map(img=>{
+      return {
+        label: img,
+        data: intermediate.reduce((arr,usr)=>(arr.push(usr.values[img]),arr),[])}});
+    
+    containersBar.update();
+
+})
 };
 
 feather.replace();
 
 var chartColors = {
-	red: 'rgb(230, 25, 75)',
+  red: 'rgb(230, 25, 75)',
+  blue: 'rgb(0, 130, 200)',
   green: 'rgb(60, 180, 75)',
   yellow: 'rgb(255, 225, 25)',
-  blue: 'rgb(0, 130, 200)',
   orange: 'rgb(245, 130, 48)',
   cyan: 'rgb(70, 240, 240)',
   magenta: 'rgb(240, 50, 230)',
@@ -222,33 +228,8 @@ var timeline = new Chart(document.getElementById("container-timeline"), {
 
 
 // containers bar
-var containersBarData = {
-  labels: [
-    'astewart',
-    'chase',
-    'imyjer',
-    'tbradberry',
-    'cblancarte',
-    'jgongora',
-    'sballerini'],
-  datasets: [{
-    label: 'Python',
-    backgroundColor: chartColors.red,
-    data: [2, 5, 3, 7, 4, 2, 5]
-  }, {
-    label: 'Python+R',
-    backgroundColor: chartColors.blue,
-    data: [4, 5, 2, 4, 7, 5, 6]
-  }, {
-    label: 'Aegir',
-    backgroundColor: chartColors.green,
-    data: [7, 4, 2, 1, 2, 0, 3]
-  }]
-};
-
 var containersBar = new Chart(document.getElementById("containers-bar"), {
     type: 'bar',
-    data: containersBarData,
     options: {
       title: {
         display: false,
@@ -269,7 +250,14 @@ var containersBar = new Chart(document.getElementById("containers-bar"), {
           stacked: true
         }]
       }
-    }
+    },
+    plugins: [{
+      beforeUpdate: function(ctx){
+        for (var i = 0; i < ctx.config.data.datasets.length; i++) {
+          ctx.config.data.datasets[i].backgroundColor = Object.values(chartColors)[i];
+        }
+      }
+    },]
   });
 
 // runtime bar
