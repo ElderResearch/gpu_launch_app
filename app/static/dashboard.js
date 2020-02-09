@@ -226,9 +226,9 @@ var timeline = new Chart(document.getElementById("container-timeline"), {
   }
 });
 
-
 // containers bar
-var containersBar = new Chart(document.getElementById("containers-bar"), {
+var ctx = document.getElementById("containers-bar").getContext('2d');
+var containersBar = new Chart(ctx, {
     type: 'bar',
     options: {
       title: {
@@ -261,7 +261,8 @@ var containersBar = new Chart(document.getElementById("containers-bar"), {
   });
 
 // runtime bar
-var runtimeBar = new Chart(document.getElementById("runtime-bar"), {
+var ctx = document.getElementById("runtime-bar").getContext('2d');
+var runtimeBar = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: [],
@@ -282,20 +283,12 @@ var runtimeBar = new Chart(document.getElementById("runtime-bar"), {
         intersect: false
       },
       responsive: true,
-      scales: {
-        xAxes: [{
-          stacked: true,
-        }],
-        yAxes: [{
-          stacked: true
-        }]
-      }
     }
   });
 
-
 // gpu usage pie
-var gpuUsagePie = new Chart(document.getElementById("gpu-usage-pie"), {
+var ctx = document.getElementById("gpu-usage-pie");
+var gpuUsagePie = new Chart(ctx, {
   type: 'pie',
   data: {
     labels: [],
@@ -313,7 +306,8 @@ var gpuUsagePie = new Chart(document.getElementById("gpu-usage-pie"), {
 });
 
 // utilization bar
-var utilizationBar = new Chart(document.getElementById("utilization-bar"), {
+var ctx = document.getElementById("utilization-bar");
+var utilizationBar = new Chart(ctx, {
   type: 'bar',
   data: {
     labels: [],
@@ -334,13 +328,5 @@ var utilizationBar = new Chart(document.getElementById("utilization-bar"), {
       intersect: false
     },
     responsive: true,
-    scales: {
-      xAxes: [{
-        stacked: true,
-      }],
-      yAxes: [{
-        stacked: true
-      }]
-    }
   }
 });
