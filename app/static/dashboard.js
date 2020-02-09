@@ -183,45 +183,119 @@ function addData(chart, label, data) {
 };
 
 // container timeline
-var timeline = new Chart(document.getElementById("container-timeline"), {
+var ctx = document.getElementById("container-timeline").getContext('2d');
+var timeline = new Chart(ctx, {
   type: 'line',
   data: {
-    labels: [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday'
-    ],
-    datasets: [{
-      data: [
-        15339,
-        21345,
-        18483,
-        24003,
-        23489,
-        24092,
-        12034
-      ],
-      lineTension: 0,
-      backgroundColor: 'transparent',
-      borderColor: '#007bff',
-      borderWidth: 4,
-      pointBackgroundColor: '#007bff'
-    }]
+    datasets: [
+      {
+        label: 'Python',
+        backgroundColor: chartColors.blue,
+        borderColor: chartColors.blue,
+        fill: false,
+        borderWidth : 40,
+        pointRadius : 0,
+        data: [
+          {
+            x: 0,
+            y: 'andrew'
+          }, 
+          {
+            x: 3,
+            y: 'andrew'
+          },
+        ]
+      },
+      {
+        backgroundColor: chartColors.green,
+        borderColor: chartColors.green,
+        fill: false,
+        borderWidth : 40,
+        pointRadius : 0,
+        data: [
+          {
+            x: 4,
+            y: 'andrew'
+          }, 
+          {
+            x: 6,
+            y: 'andrew'
+          }
+        ]
+      },
+      {
+        backgroundColor: chartColors.red,
+        borderColor: chartColors.red,
+        fill: false,
+        borderWidth : 40,
+        pointRadius : 0,
+        data: [
+          {
+            x: 3,
+            y: 'carl'
+          }, 
+          {
+            x: 5,
+            y: 'carl'
+          }
+        ]
+      },
+      {
+        backgroundColor: chartColors.blue,
+        borderColor: chartColors.blue,
+        fill: false,
+        borderWidth : 40,
+        pointRadius : 0,
+        data: [
+          {
+            x: 5,
+            y: 'carlos'
+          }, {
+            x: 10,
+            y: 'carlos'
+          }
+        ]
+      },
+      {
+        backgroundColor: chartColors.red,
+        borderColor: chartColors.red,
+        fill: false,
+        borderWidth : 40,
+        pointRadius : 0,
+        data: [
+          {
+            x: 10,
+            y: 'ian'
+          }, {
+            x: 13,
+            y: 'ian'
+          }
+        ]
+      }
+    ]
   },
   options: {
-    scales: {
-      yAxes: [{
-        ticks: {
-          beginAtZero: false
-        }
-      }]
+    tooltips: {
+      mode: 'dataset',
+      intersect: true
     },
     legend: {
-      display: false
+      display : false
+    },
+    scales: {
+      xAxes: [{
+        type: 'linear',
+        position: 'bottom',
+        ticks : {
+          beginAtzero :true,
+          stepSize : 1
+        }
+      }],
+      yAxes : [{
+        offset: true,
+        type: 'category',
+        labels: ['andrew', 'carl', 'carlos', 'ian']
+      }]
     }
   }
 });
