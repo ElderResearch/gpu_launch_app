@@ -38,7 +38,7 @@ def trim_start_stop(raw_data, start_date, end_date):
     df = raw_data.copy()
     start_date = datetime.strptime(start_date, '%Y-%m-%d')
     end_date = datetime.strptime(end_date, '%Y-%m-%d')
-    df.loc[df.start_time < start_date, 'start_time'] = start_date
+    df.loc[(df.start_time < start_date) & (df.stop_time > start_date), 'start_time'] = start_date
     df.loc[df.stop_time > end_date, 'stop_time'] = end_date
 
     return df
