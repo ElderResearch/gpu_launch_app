@@ -40,6 +40,7 @@ def trim_start_stop(raw_data, start_date, end_date):
     end_date = datetime.strptime(end_date, '%Y-%m-%d')
     df.loc[(df.start_time < start_date) & (df.stop_time > start_date), 'start_time'] = start_date
     df.loc[df.stop_time > end_date, 'stop_time'] = end_date
+    df = df.loc[(df.start_time >= start_date) & (df.stop_time <= end_date)]
 
     return df
 
