@@ -3,25 +3,29 @@
 	<td>{{ x.imagetype }}</td>
 	<td>{{ x.username }}</td>
 	<td>{{ x.num_gpus }}</td>
-  <td>{{ x.uptime }}</td>
+	<td>{{ x.uptime }}</td>
 	{% if x.username == current_user.username or current_user.is_admin() %}
-		<td><a class="btn btn-info btn-sm" href="{{ container_url(x.jupyter_port) }}" target="_blank">launch jupyter</a></td>
-		{% if x.tensorboard_port %}
-		<td><a class="btn btn-info btn-sm" href="{{ container_url(x.tensorboard_port) }}" target="_blank">launch tensorboard</a></td>
-		{% else %}
-		<td></td>
-		{% endif %}
-		{% if x.rstudio_port %}
-		    <td><a class="btn btn-info btn-sm" href="{{ container_url(x.rstudio_port) }}" target="_blank">launch rstudio</a></td>
-		{% else %}
-		    <td></td>
-		{% endif %}
-		<td>
-		    <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#kill{{ x.id }}">kill session</button>
-		</td>
+	<td><a class="btn btn-info btn-sm" href="{{ container_url(x.jupyter_port) }}" target="_blank">launch jupyter</a>
+	</td>
+	{% if x.tensorboard_port %}
+	<td><a class="btn btn-info btn-sm" href="{{ container_url(x.tensorboard_port) }}" target="_blank">launch
+			tensorboard</a></td>
 	{% else %}
-		<td></td>
-		<td></td>
-		<td></td>
+	<td></td>
+	{% endif %}
+	{% if x.rstudio_port %}
+	<td><a class="btn btn-info btn-sm" href="{{ container_url(x.rstudio_port) }}" target="_blank">launch rstudio</a>
+	</td>
+	{% else %}
+	<td></td>
+	{% endif %}
+	<td>
+		<button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#kill{{ x.id }}">kill
+			session</button>
+	</td>
+	{% else %}
+	<td></td>
+	<td></td>
+	<td></td>
 	{% endif %}
 </tr>
