@@ -14,31 +14,31 @@
             <h2 class="card-header">active sessions</h2>
             <div class="card-body">
                 <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th scope="col">docker id</th>
-		    <th scope="col">type</th>
-                    <th scope="col">owner</th>
-                    <th scope="col">gpus</th>
-                    <th scope="col">uptime</th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for x in launched_sessions %}
-		    {% include "_launched_session.html" %}
-                {% else %}
-                <tr>
-                    <td><em>no active images</em></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+                    <thead>
+                        <tr>
+                            <th scope="col">docker id</th>
+                            <th scope="col">type</th>
+                            <th scope="col">owner</th>
+                            <th scope="col">gpus</th>
+                            <th scope="col">uptime</th>
+                            <th scope="col"></th>
+                            <th scope="col"></th>
+                            <th scope="col"></th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for x in launched_sessions %}
+                        {% include "_launched_session.html" %}
+                        {% else %}
+                        <tr>
+                            <td><em>no active images</em></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 <div class="row">
@@ -46,39 +46,39 @@
         <div class="card mb-3" id="session-launcher-form">
             <h2 class="card-header">launch a gpu session</h2>
             <form class="card-body" action="/createSession" method="POST">
-    	<div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="create-imagetype" class="col-form-label">
-                    Image Type
-                </label>
-                <select type="text" class="form-control" required id="create-imagetype" name="imagetype">
-                    {% for sessopt in sessoptions %}
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="create-imagetype" class="col-form-label">
+                            Image Type
+                        </label>
+                        <select type="text" class="form-control" required id="create-imagetype" name="imagetype">
+                            {% for sessopt in sessoptions %}
                             <option {% if sessopt in disabled_options %} disabled {% elif sessopt=="gpu_dev" %}
                                 selected="selected" {% endif %}>{{ sessopt }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group col-md-6">
-                <label for="choose-gpus" class="col-form-label">
-                    Number of GPUs
-                </label>
-                <select type="text" class="form-control" required id="choose-gpus" name="num_gpus">
-                    {% for num_gpu in num_avail_gpus %}
-                    <option {% if num_gpu=='0' %} selected="selected" {% endif %}>{{ num_gpu }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-    	</div>
-        <div class="row justify-content-md-center">
-            <div class="col-md-6">
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="choose-gpus" class="col-form-label">
+                            Number of GPUs
+                        </label>
+                        <select type="text" class="form-control" required id="choose-gpus" name="num_gpus">
+                            {% for num_gpu in num_avail_gpus %}
+                            <option {% if num_gpu=='0' %} selected="selected" {% endif %}>{{ num_gpu }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row justify-content-md-center">
+                    <div class="col-md-6">
                         <button type="submit" id="create-submit" class="btn btn-success btn-block"
                             value="launch session">
-                    launch session
-                </button>
-            </div>
+                            launch session
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
-    </form>
-</div>
     </div>
 </div>
 <div class="row" id="information">
@@ -95,48 +95,59 @@
                 </p>
                 <h5 class="card-title">requirements</h5>
                 <div class="card-text">
-    <p>there are few requirements you must satisfy before this will work for you.</p>
-    <ol>
-        <li>you must have a linux user on the gpu machine itself</li>
-        <li>you must be on the ERI network to access the machine</li>
+                    <p>there are few requirements you must satisfy before this will work for you.</p>
+                    <ol>
+                        <li>you must have a linux user on the gpu machine itself</li>
+                        <li>you must be on the ERI network to access the machine</li>
                         <li>if you are launching an image with gpus attached, there must be sufficiently many free
                             gpu devices to support your request.
                         </li>
-    </ol>
+                    </ol>
                     <p>for help with all of the above, you need to contact the box admins. for now, direct all questions
                         to the <code>#gpu_users</code> slack channel
                     </p>
                 </div>
                 <h5 class="card-title">image types</h5>
                 <div class="card-text">
-    <p>we have implemented the following image types</p>
-    <ul>
-        <li>
+                    <p>we have implemented the following image types</p>
+                    <ul>
+                        <li>
                             <code>python</code>: a python-only, gpu-aware development environment with full access to
                             zero
                             or more gpus.
-        </li>
-        <li>
+                        </li>
+                        <li>
                             <code>python+R</code>: the same as the above with the addition of an <code>R</code>
                             environment
                             and a
                             running <code>rstudio</code> server. this is still in development, so may be buggy!
-        </li>
-    </ul>
-</div>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<div id="gpu-calendar">
-    <h2>calendar</h2>
-    <p>to make your own reservations, click the "add to google calendar" link in the bottom right</p>
-    <iframe
-        src="https://calendar.google.com/calendar/embed?showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;mode=WEEK&amp;height=600&amp;wkst=1&amp;bgcolor=%23ffffff&amp;src=datamininglab.com_6taegbbncqqjuv6pum1fo61ej8%40group.calendar.google.com&amp;color=%232F6309&amp;ctz=America%2FNew_York"
-        style="border-width:0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+<div class="row" id="gpu-calendar">
+    <div class="col-12">
+        <div class="card mb-3">
+            <h2 class="card-header">calendar</h2>
+            <div class="embed-responsive embed-responsive-16by9">
+                <iframe
+                    src="https://calendar.google.com/calendar/embed?showPrint=0&amp;showTabs=1&amp;showTitle=0&amp;showCalendars=0&amp;mode=WEEK&amp;height=600&amp;wkst=1&amp;bgcolor=%23ffffff&amp;src=datamininglab.com_6taegbbncqqjuv6pum1fo61ej8%40group.calendar.google.com&amp;color=%232F6309&amp;ctz=America%2FNew_York"
+                    style="border-width:0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+            </div>
+            <div class="card-footer">
+                <p class="card-text">to make your own reservations, click the "add to google calendar" link in the
+                    bottom right</p>
+                <p class="card-text"><em>NOTE:</em> if you cannot see the calendar above, make sure you are logged in to
+                    your Elder Research Google account</p>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% for x in launched_sessions %}
-	{% include "_kill_session_modal.html" %}
+{% include "_kill_session_modal.html" %}
 {% endfor %}
 {% endblock %}
