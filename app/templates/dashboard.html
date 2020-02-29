@@ -71,9 +71,8 @@
         <div class="card-header">
           <h4 class="my-0 font-weight-normal">Container Timeline</h4>
         </div>
-        <div class="card-img-top">
-          <canvas class="my-4 w-100 chartjs-render-monitor" id="container-timeline" width="1084" height="456" style="display: block; height: 228px; width: 542px;"></canvas>
-        </div>
+        <canvas class="card-img-bottom my-4 w-100 chartjs-render-monitor" id="container-timeline" width="1084"
+          height="456" style="display: block; height: 228px; width: 542px;"></canvas>
       </div>
     </div>
   </div>
@@ -85,9 +84,8 @@
         <div class="card-header">
           <h4 class="my-0 font-weight-normal">Containers</h4>
         </div>
-        <div class="card-img-top">
-          <canvas class="my-4 w-100 chartjs-render-monitor" id="containers-bar" width="1084" height="456" style="display: block; height: 228px; width: 542px;"></canvas>
-        </div>
+        <canvas class="card-img-bottom my-4 w-100 chartjs-render-monitor" id="containers-bar" width="1084" height="456"
+          style="display: block; height: 228px; width: 542px;"></canvas>
       </div>
     </div>
 
@@ -97,9 +95,8 @@
         <div class="card-header">
           <h4 class="my-0 font-weight-normal">Runtime (hrs)</h4>
         </div>
-        <div class="card-img-top">
-          <canvas class="my-4 w-100 chartjs-render-monitor" id="runtime-bar" width="1084" height="456" style="display: block; height: 228px; width: 542px;"></canvas>
-        </div>
+        <canvas class="card-img-bottom my-4 w-100 chartjs-render-monitor" id="runtime-bar" width="1084" height="456"
+          style="display: block; height: 228px; width: 542px;"></canvas>
       </div>
     </div>
   </div>
@@ -111,9 +108,8 @@
         <div class="card-header">
           <h4 class="my-0 font-weight-normal">Total GPU Usage (gpu-hrs)</h4>
         </div>
-        <div class="card-img-top">
-          <canvas class="my-4 w-100 chartjs-render-monitor" id="gpu-usage-pie" width="1084" height="456" style="display: block; height: 228px; width: 542px;"></canvas>
-        </div>
+        <canvas class="card-img-bottom my-4 w-100 chartjs-render-monitor" id="gpu-usage-pie" width="1084" height="456"
+          style="display: block; height: 228px; width: 542px;"></canvas>
       </div>
     </div>
 
@@ -123,15 +119,13 @@
         <div class="card-header">
           <h4 class="my-0 font-weight-normal">GPU Utilization Rate (%)</h4>
         </div>
-        <div class="card-img-top">
-          <canvas class="my-4 w-100 chartjs-render-monitor" id="utilization-bar" width="1084" height="456" style="display: block; height: 228px; width: 542px;"></canvas>
-        </div>
+        <canvas class="card-img-bottom my-4 w-100 chartjs-render-monitor" id="utilization-bar" width="1084" height="456"
+          style="display: block; height: 228px; width: 542px;"></canvas>
       </div>
     </div>
   </div>
 
 </div>
-
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
@@ -140,12 +134,12 @@
 <script src="https://d3js.org/d3.v5.min.js"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='dashboard.js') }}"></script>
 <script type="text/javascript">
-const load = () => {
-let startDate = $('#start-date').datepicker('getUTCDate');
-let endDate = $('#end-date').datepicker('getUTCDate');
-queryActivityLog(startDate.toISOString(), endDate.toISOString());
-};
-window.onload = load
+  const load = () => {
+    let startDate = $('#start-date').datepicker('getUTCDate');
+    let endDate = $('#end-date').datepicker('getUTCDate');
+    queryActivityLog(startDate.toISOString(), endDate.toISOString());
+  };
+  window.onload = load
 </script>
 
 {% endblock %}
