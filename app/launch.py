@@ -119,7 +119,6 @@ def _env_lookup(c, key):
 def active_eri_images(client=None, ignore_other_images=False):
     client = client or docker.from_env()
     active = []
-    url = "http://eri-gpu.cho.elderresearch.com"
 
     for c in client.containers.list():
         try:
@@ -209,9 +208,6 @@ def _validate_launch(num_gpus, client=None):
         )
     else:
         return True, None
-
-    # not defined
-    return False, "imagetype {} not handled yet".format(imagetype)
 
 
 def _update_environment(imagedict, key, val):
@@ -365,8 +361,8 @@ def launch(
 
             imagedict["ports"][8787] = port
 
-    # launch container based on provided image, mounting notebook directory from
-    # user's home directoy
+    # launch container based on provided image, mounting notebook directory
+    # from user's home directoy
     volumes = {
         "volumes": {
             user_home: {"bind": user_home, "mode": "rw"},
@@ -395,6 +391,9 @@ def launch(
     imagedict["runtime"] = "nvidia"
 
     try:
+        # docker.containers.run() will fail if passed extraneous kwargs
+        if "description" in imagedict:
+            del imagedict["description"]
         # look upon my kwargs hack and tremble. later dicts have priority
         container = client.containers.run(**{**imagedict, **volumes, **kwargs})
     except Exception as e:

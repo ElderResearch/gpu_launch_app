@@ -1,24 +1,52 @@
 Python:
+    description: |
+        a python-only, gpu-aware development environment with full access to zero or more gpus.
     image: eri_dev:{tag}
-    auto_remove: True
-    detach: True
+    auto_remove: true
+    detach: true
     ports:
         8888: auto
+        8008: auto
 Python+R:
+    description: |
+        the same as the <code>Python</code> image with the addition of an <code>R</code> environment and a running <code>rstudio</code> server.
     image: eri_dev_p_r:{tag}
     auto_remove: true
     detach: true
     ports:
         8888: auto
         8787: auto
+        8008: auto
 Chill:
+    description: |
+        a custom image created for the Chill Project.
     image: chill:{tag}
     auto_remove: true
     detach: true
     ports:
         8888: auto
 Aegir:
+    description: |
+        a custom image created for the Aegir Project.
     image: aegir:{tag}
+    auto_remove: true
+    detach: true
+    ports:
+        8888: auto
+        8787: auto
+BT45:
+    description: |
+        a custom image created for the BT-45 bench task.
+    image: bt45:{tag}
+    auto_remove: true
+    detach: true
+    ports:
+        8888: auto
+        8008: auto
+RadpidsAI:
+    description: |
+        a custom image with RapidsAI built-in.
+    image: rapidsai-eri:{tag}
     auto_remove: true
     detach: true
     ports:

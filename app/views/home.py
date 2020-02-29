@@ -48,6 +48,7 @@ def index():
         launched_sessions=launched_sessions,
         sessoptions=sorted(launch.ERI_IMAGES.keys()),
         num_avail_gpus=list(range(len(launch._get_avail_devices()) + 1)),
+        images=launch.ERI_IMAGES,
     )
 
 

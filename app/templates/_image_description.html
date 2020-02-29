@@ -1,0 +1,7 @@
+<li>
+    {% if "description" in values %}
+    <code>{{ image_name }}</code>: {{ values.description|safe }}
+    {% else %}
+    <code>{{ image_name }}</code>: No description provided.
+    {% endif %}
+</li>
