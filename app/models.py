@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
-from datetime import datetime
 import grp
+from datetime import datetime
+
 from flask_login import UserMixin
 from notebook.auth.security import passwd, passwd_check
+
 from .extensions import db, login
+
 
 class ActivityLog(db.Model):
     id = db.Column(db.String(64), primary_key=True)
@@ -20,6 +23,7 @@ class ActivityLog(db.Model):
     def stop(self):
         self.stop_time = datetime.utcnow()
 
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(32), index=True, unique=True)
@@ -30,13 +34,14 @@ class User(UserMixin, db.Model):
         return "User <{}>".format(self.username)
 
     def is_admin(self):
-        return self.username in grp.getgrnam('admin').gr_mem
+        return self.username in grp.getgrnam("admin").gr_mem
 
     def set_password_hash(self, password):
         self.password_hash = passwd(password)
 
     def check_password(self, password):
         return passwd_check(self.password_hash, password)
+
 
 @login.user_loader
 def user_loader(id):
