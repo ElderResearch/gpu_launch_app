@@ -71,7 +71,7 @@ def create_session():
     )
     entry = ActivityLog(
         id=resp["id"],
-        username=current_user.username,
+        user=current_user,
         image_type=resp["imagetype"],
         num_gpus=resp["num_gpus"],
     )
@@ -94,7 +94,7 @@ def kill_session():
     entry = ActivityLog.query.filter_by(id=request.form["docker_id"]).first()
 
     if entry is not None:
-        if current_user.username == entry.username or current_user.is_admin():
+        if current_user == entry.user or current_user.is_admin():
             resp = launch.kill(docker_id=request.form["docker_id"])
             # handle errors
             if resp.get("error", False):
