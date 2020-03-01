@@ -88,15 +88,11 @@ def create_session():
 @home.route("/killSession", methods=["POST"])
 @login_required
 def kill_session():
-<<<<<<< HEAD
     """
     Method allowing users to kill their containers
     Admins can kill any container
     """
-    ## TODO: Modify this function for logged-in user or admin password
-=======
     # TODO: Modify this function for logged-in user or admin password
->>>>>>> formatted python files with black
     # verify that the password they provided hashes to the same value as the
     # known pw hash
 
@@ -122,21 +118,20 @@ def kill_session():
                 category=FLASH_CLS["success"],
             )
     else:
-<<<<<<< HEAD
         if current_user.is_admin():
-            resp = launch.kill(docker_id=request.form['docker_id'])
+            resp = launch.kill(docker_id=request.form["docker_id"])
             # handle errors
-            if resp.get('error', False):
+            if resp.get("error", False):
                 flash(
-                    message=resp.get('message', 'unhandled error'),
-                    category=FLASH_CLS['error']
+                    message=resp.get("message", "unhandled error"),
+                    category=FLASH_CLS["error"],
                 )
-                return redirect(url_for('home.index'))
+                return redirect(url_for("home.index"))
             flash(
                 message="docker container {} killed successfully".format(
-                    request.form['docker_id'][:10]
+                    request.form["docker_id"][:10]
                 ),
-                category=FLASH_CLS['success']
+                category=FLASH_CLS["success"],
             )
         else:
             flash(
@@ -144,19 +139,9 @@ def kill_session():
                     "unable to kill session. if this is your container and the"
                     " problem persists, contact admin for assistance"
                 ),
-                category=FLASH_CLS['error']
+                category=FLASH_CLS["error"],
             )
-    return redirect(url_for('home.index'))
-=======
-        flash(
-            message=(
-                "unable to kill session. if this is your container and the"
-                " problem persists, contact admin for assistance"
-            ),
-            category=FLASH_CLS["error"],
-        )
     return redirect(url_for("home.index"))
->>>>>>> formatted python files with black
 
 
 @home.route("/login", methods=["GET", "POST"])
