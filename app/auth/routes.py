@@ -29,7 +29,7 @@ def login():
                         user.set_password_hash(form.password.data)
                         db.session.add(user)
                         db.session.commit()
-                    except Exception as e:
+                    except Exception:
                         db.session.rollback()
                         flash(
                             message=(

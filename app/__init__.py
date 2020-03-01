@@ -8,7 +8,7 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
-from . import config
+from app import config
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -43,7 +43,7 @@ def register_extensions(server):
             db.session.add_all(rows)
             try:
                 db.session.commit()
-            except:
+            except Exception:
                 db.session.rollback()
     migrate.init_app(
         server, db, directory=os.path.join(os.path.dirname(__file__), "migrations")
@@ -55,7 +55,9 @@ def register_extensions(server):
 
 def register_blueprints(server):
     from app.auth import bp as auth_bp
+    from app.dashboard import bp as dash_bp
     from app.views.home import home
 
     server.register_blueprint(auth_bp, url_prefix="/auth")
+    server.register_blueprint(dash_bp, url_prefix="/dashboard")
     server.register_blueprint(home)

@@ -52,7 +52,8 @@ def impute_stop_times(raw_data, start_date):
         if idx in running:  # container still running
             df.loc[idx, "stop_time"] = datetime.utcnow()
         else:
-            df.loc[idx, "stop_time"] = df.loc[idx, "start_time"] + timedelta(days=1)
+            delta = timedelta(days=1)
+            df.loc[idx, "stop_time"] = df.loc[idx, "start_time"] + delta
 
     df = df.loc[df["stop_time"] > start_date]
     return df
@@ -60,12 +61,11 @@ def impute_stop_times(raw_data, start_date):
 
 def trim_start_stop(raw_data, start_date, end_date):
     """
-    trim the container start and/or stop times to fit in the selected date range
+    trim the container start and/or stop times to fit in selected date range
     """
     df = raw_data.copy()
-    df.loc[
-        (df.start_time < start_date) & (df.stop_time > start_date), "start_time"
-    ] = start_date
+    mask = (df.start_time < start_date) & (df.stop_time > start_date)
+    df.loc[mask, "start_time"] = start_date
     df.loc[df.stop_time > end_date, "stop_time"] = end_date
 
     return df

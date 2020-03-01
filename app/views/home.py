@@ -4,9 +4,8 @@ from urllib.parse import urlparse
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
-from .. import launch
+from app import launch
 from app import db
-from app.helpers import data_query
 from app.models import ActivityLog
 
 FLASH_CLS = {
@@ -79,7 +78,6 @@ def create_session():
     )
     db.session.add(entry)
     db.session.commit()
-    cache.delete_memoized(data_query)
     return redirect(url_for("home.index"))
 
 
@@ -108,7 +106,6 @@ def kill_session():
                 return redirect(url_for("home.index"))
             entry.stop()
             db.session.commit()
-            cache.delete_memoized(data_query)
             flash(
                 message="docker container {} killed successfully".format(
                     request.form["docker_id"][:10]
@@ -140,17 +137,3 @@ def kill_session():
                 category=FLASH_CLS["error"],
             )
     return redirect(url_for("home.index"))
-
-
-@home.route("/dashboard", methods=["GET"])
-@login_required
-def dashboard():
-    return render_template("dashboard.html")
-
-
-@home.route("/data", methods=["GET"])
-@login_required
-def data():
-    start_date = request.args.get("start_date")
-    end_date = request.args.get("end_date")
-    return data_query(start_date, end_date)
