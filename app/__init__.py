@@ -56,8 +56,8 @@ def register_extensions(server):
 def register_blueprints(server):
     from app.auth import bp as auth_bp
     from app.dashboard import bp as dash_bp
-    from app.views.home import home
+    from app.main import bp as main_bp
 
     server.register_blueprint(auth_bp, url_prefix="/auth")
     server.register_blueprint(dash_bp, url_prefix="/dashboard")
-    server.register_blueprint(home)
+    server.register_blueprint(main_bp)

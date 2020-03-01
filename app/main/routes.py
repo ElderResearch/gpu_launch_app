@@ -1,11 +1,12 @@
 from datetime import datetime
 from urllib.parse import urlparse
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from app import launch
 from app import db
+from app.main import bp
 from app.models import ActivityLog
 
 FLASH_CLS = {
@@ -13,13 +14,11 @@ FLASH_CLS = {
     "success": "alert alert-success",
 }
 
-home = Blueprint("home", __name__)
 
-
-@home.context_processor
+@bp.context_processor
 def process_context():
     def container_url(port):
-        u = urlparse(url_for("home.index", _external=True))
+        u = urlparse(url_for("main.index", _external=True))
         if u.port:
             return u._replace(netloc=u.netloc.replace(str(u.port), str(port))).geturl()
         else:
@@ -28,20 +27,20 @@ def process_context():
     return dict(container_url=container_url)
 
 
-@home.before_request
+@bp.before_request
 def before_request():
     if current_user.is_authenticated:
         current_user.last_seen == datetime.utcnow()
         db.session.commit()
 
 
-@home.route("/", methods=["GET"])
+@bp.route("/", methods=["GET"])
 @login_required
 def index():
     launched_sessions = launch.active_eri_images(ignore_other_images=True)
 
     return render_template(
-        "index.html",
+        "main/index.html",
         launched_sessions=launched_sessions,
         sessoptions=sorted(launch.ERI_IMAGES.keys()),
         num_avail_gpus=list(range(len(launch._get_avail_devices()) + 1)),
@@ -49,7 +48,7 @@ def index():
     )
 
 
-@home.route("/createSession", methods=["POST"])
+@bp.route("/createSession", methods=["POST"])
 @login_required
 def create_session():
     resp = launch.launch(
@@ -78,10 +77,10 @@ def create_session():
     )
     db.session.add(entry)
     db.session.commit()
-    return redirect(url_for("home.index"))
+    return redirect(url_for("main.index"))
 
 
-@home.route("/killSession", methods=["POST"])
+@bp.route("/killSession", methods=["POST"])
 @login_required
 def kill_session():
     """
@@ -103,7 +102,7 @@ def kill_session():
                     message=resp.get("message", "unhandled error"),
                     category=FLASH_CLS["error"],
                 )
-                return redirect(url_for("home.index"))
+                return redirect(url_for("main.index"))
             entry.stop()
             db.session.commit()
             flash(
@@ -121,7 +120,7 @@ def kill_session():
                     message=resp.get("message", "unhandled error"),
                     category=FLASH_CLS["error"],
                 )
-                return redirect(url_for("home.index"))
+                return redirect(url_for("main.index"))
             flash(
                 message="docker container {} killed successfully".format(
                     request.form["docker_id"][:10]
@@ -136,4 +135,4 @@ def kill_session():
                 ),
                 category=FLASH_CLS["error"],
             )
-    return redirect(url_for("home.index"))
+    return redirect(url_for("main.index"))

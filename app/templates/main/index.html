@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "base.html" %}
 {% block body %}
 <div class="jumbotron my-3" id="welcome">
     <h1 class="display-4">Welcome, {{ current_user.username }}!</h1>
@@ -29,7 +29,7 @@
                     </thead>
                     <tbody>
                         {% for x in launched_sessions %}
-                        {% include "_launched_session.html" %}
+                        {% include "main/_launched_session.html" %}
                         {% else %}
                         <tr>
                             <td><em>no active images</em></td>
@@ -111,7 +111,7 @@
                     <p>we have implemented the following image types</p>
                     <ul>
                         {% for image_name, values in images.items() %}
-                        {% include "_image_description.html" %}
+                        {% include "main/_image_description.html" %}
                         {% endfor %}
                     </ul>
                 </div>
