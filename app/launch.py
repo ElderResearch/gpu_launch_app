@@ -41,7 +41,7 @@ INSTALLED_DEVICES = set(["0", "1", "2", "3"])
 
 try:
     with open(Path(__file__).resolve().parents[1] / "images.yaml", "r") as doc:
-        ERI_IMAGES = yaml.load(doc, yaml.Loader)
+        ERI_IMAGES = yaml.safe_load(doc)
 except FileNotFoundError:
     ERI_IMAGES = {
         "Python": {
@@ -112,7 +112,7 @@ def _env_lookup(c, key):
             v = entry[i + 1 :]
             if k == key:
                 return v
-    except:
+    except Exception:
         return None
 
 
@@ -123,7 +123,7 @@ def active_eri_images(client=None, ignore_other_images=False):
     for c in client.containers.list():
         try:
             imagetype = c.attrs["Config"]["Labels"].get("image_type", None)
-        except Exception as e:
+        except Exception:
             print("untagged image {}".format(c.image.id))
             continue
 
