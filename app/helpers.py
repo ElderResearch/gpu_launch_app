@@ -11,7 +11,7 @@ from numpy.random import exponential
 from sqlalchemy import and_, or_
 
 from app.extensions import db
-from app.models import ActivityLog
+from app.models import ActivityLog, User
 
 
 def generate_usage_log_data(Model, n=100):
@@ -78,7 +78,8 @@ def data_query(start_date, end_date, impute_dates=True, trim_dates=True):
     """
     start_date = dateutil.parser.parse(start_date, ignoretz=True)
     end_date = dateutil.parser.parse(end_date, ignoretz=True)
-    query = ActivityLog.query.filter(
+    query = db.session.query(ActivityLog, User.username).join(User)
+    query = query.filter(
         or_(
             and_(
                 ActivityLog.start_time.__le__(start_date),

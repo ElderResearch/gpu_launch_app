@@ -11,7 +11,7 @@ from .extensions import db, login
 
 class ActivityLog(db.Model):
     id = db.Column(db.String(64), primary_key=True)
-    username = db.Column(db.String(32))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     image_type = db.Column(db.String(8))
     num_gpus = db.Column(db.Integer)
     start_time = db.Column(db.DateTime, default=datetime.utcnow)
@@ -29,6 +29,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(32), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    containers = db.relationship("ActivityLog", backref="user", lazy="dynamic")
 
     def __repr__(self):
         return "User <{}>".format(self.username)
