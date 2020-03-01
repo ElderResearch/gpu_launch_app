@@ -4,8 +4,15 @@ import os
 
 from flask import Flask
 from flask.cli import load_dotenv
+from flask_login import LoginManager
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 
 from . import config
+
+db = SQLAlchemy()
+migrate = Migrate()
+login = LoginManager()
 
 
 def create_app():
@@ -25,13 +32,9 @@ def create_app():
 
 
 def register_extensions(server):
-    from .extensions import db, migrate, login, cache
-    from .helpers import generate_usage_log_data
-    from .models import ActivityLog
+    from app.helpers import generate_usage_log_data
+    from app.models import ActivityLog
 
-    cache.init_app(server)
-    with server.app_context():
-        cache.clear()
     db.init_app(server)
     with server.app_context():
         if os.getenv("FLASK_ENV") == "development" and "DATABASE_URL" not in os.environ:
@@ -46,11 +49,13 @@ def register_extensions(server):
         server, db, directory=os.path.join(os.path.dirname(__file__), "migrations")
     )
     login.init_app(server)
-    login.login_view = "home.login"
+    login.login_view = "auth.login"
     login.login_message = ""
 
 
 def register_blueprints(server):
-    from .views.home import home
+    from app.auth import bp as auth_bp
+    from app.views.home import home
 
+    server.register_blueprint(auth_bp, url_prefix="/auth")
     server.register_blueprint(home)

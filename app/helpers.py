@@ -10,7 +10,7 @@ import pandas as pd
 from numpy.random import exponential
 from sqlalchemy import and_, or_
 
-from app.extensions import db
+from app import db
 from app.models import ActivityLog, User
 
 
