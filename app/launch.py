@@ -15,7 +15,6 @@ Usage:
 
 import argparse
 import copy
-import datetime
 import getpass
 import hashlib
 import logging
@@ -27,9 +26,10 @@ import dateutil.parser
 import docker
 import pam
 import psutil
-import pytz
 import yaml
 from notebook.auth import passwd
+
+from app.utils import _calculate_uptime
 
 # ----------------------------- #
 #   Module Constants            #
@@ -90,15 +90,6 @@ def _get_avail_devices(client=None, installed_devices=INSTALLED_DEVICES):
     return available_devices
 
 
-def _calculate_uptime(t0):
-    t1 = datetime.datetime.now(tz=pytz.timezone("US/Eastern"))
-    td = t1 - t0
-    days, rem = divmod(td.total_seconds(), 86400)
-    hours, rem = divmod(rem, 3600)
-    minutes, seconds = divmod(rem, 60)
-    return days, hours, minutes, seconds
-
-
 def _running_images(client=None, ignore_other_images=False):
     return [tag for c in client.containers.list() for tag in c.image.tags]
 
@@ -109,7 +100,7 @@ def _env_lookup(c, key):
         for entry in c.attrs["Config"]["Env"]:
             i = entry.find("=")
             k = entry[:i]
-            v = entry[i + 1 :]
+            v = entry[i + 1 :]  # noqa: E203
             if k == key:
                 return v
     except Exception:
@@ -331,9 +322,10 @@ def launch(
         # environment variable PASSWORD, so we need to set that in our container
         _update_environment(imagedict, "PASSWORD", password_hash or passwd(password))
 
-        # if container launched from webapp, set Jupytertoken to Jupyter hashed password
-        # else, if launched from CLI, hash system (linux) password and set as Jupytertoken
-        # CLI launch will always produce the same hash - useful for connecting from local IDE
+        # if container launched from webapp, set Jupytertoken to Jupyter hashed
+        # password else, if launched from CLI, hash system (linux) password and
+        # set as Jupytertoken CLI launch will always produce the same hash -
+        # useful for connecting from local IDE
         if password_hash:
             _update_environment(imagedict, "JUPYTERTOKEN", password_hash)
         else:
