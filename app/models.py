@@ -7,6 +7,7 @@ from flask_login import UserMixin
 from notebook.auth.security import passwd, passwd_check
 
 from app import db, login
+from app.utils import dump_datetime
 
 
 class ActivityLog(db.Model):
@@ -22,6 +23,18 @@ class ActivityLog(db.Model):
 
     def stop(self):
         self.stop_time = datetime.utcnow()
+
+    @property
+    def serialize(self):
+        """Return object data in easily serializable format"""
+        return {
+            "id": self.id,
+            "username": self.user.username,
+            "image_type": self.image_type,
+            "num_gpus": self.num_gpus,
+            "start_time": dump_datetime(self.start_time),
+            "stop_time": dump_datetime(self.stop_time),
+        }
 
 
 class User(UserMixin, db.Model):
@@ -42,6 +55,16 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return passwd_check(self.password_hash, password)
+
+    @property
+    def serialize(self):
+        """Return object data in easily serializable format"""
+        return {
+            "id": self.id,
+            "username": self.username,
+            "last_seen": dump_datetime(self.last_seen),
+            "containers": [c.serialize for c in self.containers],
+        }
 
 
 @login.user_loader
