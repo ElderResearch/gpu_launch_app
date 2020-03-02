@@ -18,10 +18,10 @@
     <div class="col-lg-3 col-sm-6">
       <div class="card mt-4 shadow-sm">
         <div class="card-header">
-          <h4 class="my-0 font-weight-normal">Containers</h4>
+          <h4 class="my-0">Containers</h4>
         </div>
         <div class="card-body">
-          <h1 class="card-title" id="launched-containers-metric">93</h1>
+          <h1 class="card-title" id="launched-containers-metric"></h1>
         </div>
       </div>
     </div>
@@ -30,10 +30,10 @@
     <div class="col-lg-3 col-sm-6">
       <div class="card mt-4 shadow-sm">
         <div class="card-header">
-          <h4 class="my-0 font-weight-normal">Runtime (hrs)</h4>
+          <h4 class="my-0">Runtime (hrs)</h4>
         </div>
         <div class="card-body">
-          <h1 class="card-title" id="runtime-hours-metric">2327</h1>
+          <h1 class="card-title" id="runtime-hours-metric"></h1>
         </div>
       </div>
     </div>
@@ -42,10 +42,10 @@
     <div class="col-lg-3 col-sm-6">
       <div class="card mt-4 shadow-sm">
         <div class="card-header">
-          <h4 class="my-0 font-weight-normal">GPU Utilization</h4>
+          <h4 class="my-0">GPU Utilization</h4>
         </div>
         <div class="card-body">
-          <h1 class="card-title" id="gpu-utilization-metric">46%</h1>
+          <h1 class="card-title" id="gpu-utilization-metric"></h1>
         </div>
       </div>
     </div>
@@ -54,25 +54,11 @@
     <div class="col-lg-3 col-sm-6">
       <div class="card mt-4 shadow-sm">
         <div class="card-header">
-          <h4 class="my-0 font-weight-normal">AWS Savings</h4>
+          <h4 class="my-0">AWS Savings</h4>
         </div>
         <div class="card-body">
-          <h1 class="card-title" id='aws-savings-metric'>$4,190.93</h1>
+          <h1 class="card-title" id='aws-savings-metric'></h1>
         </div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="row text-center">
-    <!-- Container Timeline -->
-    <div class="col">
-      <div class="card mb-4 shadow-sm">
-        <div class="card-header">
-          <h4 class="my-0 font-weight-normal">Container Timeline</h4>
-        </div>
-        <canvas class="card-img-bottom my-4 w-100 chartjs-render-monitor" id="container-timeline" width="1084"
-          height="456" style="display: block; height: 228px; width: 542px;"></canvas>
       </div>
     </div>
   </div>
@@ -82,7 +68,7 @@
     <div class="col-lg-6">
       <div class="card mb-4 shadow-sm">
         <div class="card-header">
-          <h4 class="my-0 font-weight-normal">Containers</h4>
+          <h4 class="my-0">Containers</h4>
         </div>
         <canvas class="card-img-bottom my-4 w-100 chartjs-render-monitor" id="containers-bar" width="1084" height="456"
           style="display: block; height: 228px; width: 542px;"></canvas>
@@ -93,7 +79,7 @@
     <div class="col-lg-6">
       <div class="card mb-4 shadow-sm">
         <div class="card-header">
-          <h4 class="my-0 font-weight-normal">Runtime (hrs)</h4>
+          <h4 class="my-0">Runtime (hrs)</h4>
         </div>
         <canvas class="card-img-bottom my-4 w-100 chartjs-render-monitor" id="runtime-bar" width="1084" height="456"
           style="display: block; height: 228px; width: 542px;"></canvas>
@@ -106,7 +92,7 @@
     <div class="col-lg-6">
       <div class="card mb-4 shadow-sm">
         <div class="card-header">
-          <h4 class="my-0 font-weight-normal">Total GPU Usage (gpu-hrs)</h4>
+          <h4 class="my-0">Total GPU Usage (gpu-hrs)</h4>
         </div>
         <canvas class="card-img-bottom my-4 w-100 chartjs-render-monitor" id="gpu-usage-pie" width="1084" height="456"
           style="display: block; height: 228px; width: 542px;"></canvas>
@@ -117,14 +103,76 @@
     <div class="col-lg-6">
       <div class="card mb-4 shadow-sm">
         <div class="card-header">
-          <h4 class="my-0 font-weight-normal">GPU Utilization Rate (%)</h4>
+          <h4 class="my-0">GPU Utilization Rate (%)</h4>
         </div>
         <canvas class="card-img-bottom my-4 w-100 chartjs-render-monitor" id="utilization-bar" width="1084" height="456"
           style="display: block; height: 228px; width: 542px;"></canvas>
       </div>
     </div>
   </div>
-
+  <div class="row">
+    <!-- Container History -->
+    <div class="col">
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+          <h4 class="my-0 text-center">Container History</h4>
+        </div>
+        <div class="card-body">
+          <table class="table table-sm mb-3">
+            <thead>
+              <tr>
+                <th scope="col">user</th>
+                <th scope="col">type</th>
+                <th scope="col">gpus</th>
+                <th scope="col">runtime</th>
+                <th scope="col">start time</th>
+                <th scope="col">stop time</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body">
+              <!--this is filled with table data using D3.js-->
+              <tr>
+                <td scope="row">carlos</td>
+                <td scope="row">Python+R</td>
+                <td scope="row">2</td>
+                <td scope="row">14.2 hrs</td>
+                <td scope="row">2019/12/21 02:02:34</td>
+                <td scope="row">2019/12/21 16:08:21</td>
+              </tr>
+              <tr>
+                <td scope="row">andrew</td>
+                <td scope="row">Python</td>
+                <td scope="row">2</td>
+                <td scope="row">12.2 hrs</td>
+                <td scope="row">2019/12/24 02:02:34</td>
+                <td scope="row">2019/12/24 14:08:21</td>
+              </tr>
+              <!---------------------------------------------->
+            </tbody>
+          </table>
+          <nav aria-label="Page navigation example">
+            <ul class="pagination pagination-sm justify-content-center">
+              <li class="page-item">
+                <a class="page-link" href="#" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                  <span class="sr-only">Previous</span>
+                </a>
+              </li>
+              <li class="page-item" value="1"><a class="page-link" href="#">1</a></li>
+              <li class="page-item"><a class="page-link" href="#">2</a></li>
+              <li class="page-item"><a class="page-link" href="#">3</a></li>
+              <li class="page-item">
+                <a class="page-link" href="#" aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                  <span class="sr-only">Next</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
