@@ -7,7 +7,7 @@ from flask_login import UserMixin
 from notebook.auth.security import passwd, passwd_check
 
 from app import db, login
-from app.utils import dump_datetime
+from app.utils import _calculate_uptime, dump_datetime
 
 
 class ActivityLog(db.Model):
@@ -25,6 +25,13 @@ class ActivityLog(db.Model):
         self.stop_time = datetime.utcnow()
 
     @property
+    def uptime(self):
+        """Return a tuple of days, hours, minutes, and seconds"""
+        return _calculate_uptime(
+            t0=self.start_time, t1=self.stop_time or datetime.utcnow()
+        )
+
+    @property
     def serialize(self):
         """Return object data in easily serializable format"""
         return {
@@ -32,6 +39,7 @@ class ActivityLog(db.Model):
             "username": self.user.username,
             "image_type": self.image_type,
             "num_gpus": self.num_gpus,
+            "uptime": dict(zip(["days", "hours", "minutes", "seconds"], self.uptime)),
             "start_time": dump_datetime(self.start_time),
             "stop_time": dump_datetime(self.stop_time),
         }
