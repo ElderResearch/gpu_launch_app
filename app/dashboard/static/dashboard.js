@@ -59,17 +59,22 @@ function queryActivityLog(startDate, endDate) {
     })
     .then(json => {
 
+      json.forEach(c => {
+        c.hours = c.uptime / 3600;
+        c.gpu_hours = c.num_gpus * c.hours;
+      });
+
       // update total containers key metric
       $('#launched-containers-metric').html(json.length);
 
       // update total runtime hours key metric
       $('#runtime-hours-metric').html(
-        Math.round(d3.sum(json, d => d.runtime)));
+        Math.round(d3.sum(json, d => d.hours)));
 
       // update gpu utilization metric
       $('#gpu-utilization-metric').html(
         Math.round(
-          d3.sum(json, d => d.gpu_hours) / d3.sum(json, d => d.runtime) * 100) + "%");
+          d3.sum(json, d => d.gpu_hours) / d3.sum(json, d => d.hours) * 100) + "%");
 
       // update AWS savings metric
       let awsCost = 3.06
@@ -80,9 +85,9 @@ function queryActivityLog(startDate, endDate) {
       resetChart(runtimeBar);
       (d3.nest()
         .key(d => d.username)
-        .rollup(v => d3.sum(v, d => d.runtime))
+        .rollup(v => d3.sum(v, d => d.hours))
         .entries(json))
-      .sort((a, b) => {
+        .sort((a, b) => {
           return b.value - a.value;
         })
         .map(o => addData(runtimeBar, o.key, o.value.toFixed(2)));
@@ -93,7 +98,7 @@ function queryActivityLog(startDate, endDate) {
         .key(d => d.username)
         .rollup(v => d3.sum(v, d => d.gpu_hours))
         .entries(json))
-      .filter(d => {
+        .filter(d => {
           return d.value > 0;
         })
         .sort((a, b) => {
@@ -108,7 +113,7 @@ function queryActivityLog(startDate, endDate) {
         .rollup(v => {
           return {
             gpu_hours: d3.sum(v, d => d.gpu_hours),
-            total_hours: d3.sum(v, d => d.runtime)
+            total_hours: d3.sum(v, d => d.hours)
           }
         })
         .entries(json)).map(d => {
@@ -130,9 +135,9 @@ function queryActivityLog(startDate, endDate) {
       // update containers bar
       resetChart(containersBar);
       var images = json.reduce((arr, val) => {
-          arr.push(val.image_type);
-          return arr;
-        }, [])
+        arr.push(val.image_type);
+        return arr;
+      }, [])
         .filter((value, index, self) => {
           return self.indexOf(value) === index;
         })
@@ -148,8 +153,8 @@ function queryActivityLog(startDate, endDate) {
         .reduce((arr, d) => (arr.push(d.key), arr), []);
 
       var intermediate = (d3.nest()
-          .key(d => d.username)
-          .entries(json))
+        .key(d => d.username)
+        .entries(json))
         .sort((a, b) => {
           return users.indexOf(a.key) - users.indexOf(b.key)
         })
@@ -245,7 +250,7 @@ var containersBar = new Chart(ctx, {
         ctx.config.data.datasets[i].backgroundColor = Object.values(chartColors)[i];
       }
     }
-  }, ]
+  },]
 });
 
 // runtime bar
