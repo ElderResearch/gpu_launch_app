@@ -181,7 +181,63 @@ function queryActivityLog(startDate, endDate) {
 
       containersBar.update();
 
+      var columns = [
+        { head: 'User', cl: 'text-center', html: function (r) { return r.username; } },
+        { head: 'Image Type', cl: 'text-center', html: function (r) { return r.image_type; } },
+        { head: 'GPUs', cl: 'text-center', html: function (r) { return r.num_gpus; } },
+        {
+          head: 'Uptime', cl: 'text-center', html: function (r) {
+            var duration = moment.duration(r.uptime, 'seconds');
+            return duration.humanize();
+          }
+        },
+        {
+          head: 'Start Time', cl: 'text-center', html: function (r) {
+            var start_time = moment.utc(r.start_time);
+            return start_time.format('l LT');
+          }
+        },
+        {
+          head: 'Stop Time', cl: 'text-center', html: function (r) {
+            var stop_time = moment.utc(r.stop_time);
+            return stop_time.format('l LT');
+          }
+        }
+      ];
+
+      table = makeTable('#history-table', columns, json);
+
+
     })
+};
+
+function makeTable(id, columns, data) {
+  var table = d3.select(id);
+  table.append('thead').append('tr')
+    .selectAll('th')
+    .data(columns).enter()
+    .append('th')
+    .attr('class', function (r) { return r.cl; })
+    .text(function (r) { return r.head; });
+
+  table.append('tbody')
+    .selectAll('tr')
+    .data(data).enter()
+    .append('tr')
+    .selectAll('td')
+    .data(function (row, i) {
+      // evaluate column objects against the current row
+      return columns.map(function (c) {
+        var cell = {};
+        d3.keys(c).forEach(function (k) {
+          cell[k] = typeof c[k] == 'function' ? c[k](row, i) : c[k];
+        });
+        return cell;
+      });
+    }).enter()
+    .append('td')
+    .html(function (r) { return r.html; })
+    .attr('class', function (r) { return r.cl; });
 };
 
 feather.replace();

@@ -7,7 +7,6 @@ from flask_login import UserMixin
 from notebook.auth.security import passwd, passwd_check
 
 from app import db, login
-from app.utils import dump_datetime
 
 
 class ActivityLog(db.Model):
@@ -40,8 +39,8 @@ class ActivityLog(db.Model):
             "image_type": self.image_type,
             "num_gpus": self.num_gpus,
             "uptime": self.uptime,
-            "start_time": dump_datetime(self.start_time),
-            "stop_time": dump_datetime(self.stop_time),
+            "start_time": self.start_time.isoformat(timespec="seconds"),
+            "stop_time": self.stop_time.isoformat(timespec="seconds"),
         }
 
 
@@ -70,7 +69,7 @@ class User(UserMixin, db.Model):
         return {
             "id": self.id,
             "username": self.username,
-            "last_seen": dump_datetime(self.last_seen),
+            "last_seen": self.last_seen.isoformat(),
             "containers": [c.serialize for c in self.containers],
         }
 

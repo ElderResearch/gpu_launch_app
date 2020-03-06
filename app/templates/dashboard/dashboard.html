@@ -118,37 +118,8 @@
           <h4 class="my-0 text-center">Container History</h4>
         </div>
         <div class="card-body">
-          <table class="table table-sm mb-3">
-            <thead>
-              <tr>
-                <th scope="col">user</th>
-                <th scope="col">type</th>
-                <th scope="col">gpus</th>
-                <th scope="col">runtime</th>
-                <th scope="col">start time</th>
-                <th scope="col">stop time</th>
-              </tr>
-            </thead>
-            <tbody id="history-table-body">
-              <!--this is filled with table data using D3.js-->
-              <tr>
-                <td scope="row">carlos</td>
-                <td scope="row">Python+R</td>
-                <td scope="row">2</td>
-                <td scope="row">14.2 hrs</td>
-                <td scope="row">2019/12/21 02:02:34</td>
-                <td scope="row">2019/12/21 16:08:21</td>
-              </tr>
-              <tr>
-                <td scope="row">andrew</td>
-                <td scope="row">Python</td>
-                <td scope="row">2</td>
-                <td scope="row">12.2 hrs</td>
-                <td scope="row">2019/12/24 02:02:34</td>
-                <td scope="row">2019/12/24 14:08:21</td>
-              </tr>
-              <!---------------------------------------------->
-            </tbody>
+          <table class="table table-striped table-sm mb-3" id="history-table">
+            <!-- d3.js fills in table here -->
           </table>
           <nav aria-label="Page navigation example">
             <ul class="pagination pagination-sm justify-content-center">
