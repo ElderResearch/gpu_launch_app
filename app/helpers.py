@@ -48,11 +48,12 @@ def impute_stop_times(logs, start_date):
     client = docker.from_env()
     running = [c.id for c in client.containers.list(sparse=True)]
     for log in logs:
-        if log.id in running:  # container still running
-            log.stop()
-        else:
-            delta = timedelta(days=1)
-            log.stop_time = log.start_time + delta
+        if log.stop_time is None:
+            if log.id in running:  # container still running
+                log.stop()
+            else:
+                delta = timedelta(days=1)
+                log.stop_time = log.start_time + delta
 
     return [log for log in logs if log.stop_time > start_date]
 
