@@ -4,9 +4,9 @@ import grp
 from datetime import datetime
 
 from flask_login import UserMixin
-from notebook.auth.security import passwd, passwd_check
 
 from app import db, login
+from app.utils import passwd, passwd_check
 
 
 class ActivityLog(db.Model):

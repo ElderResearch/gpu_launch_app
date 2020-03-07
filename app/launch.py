@@ -27,9 +27,8 @@ import docker
 import pam
 import psutil
 import yaml
-from notebook.auth import passwd
 
-from app.utils import _calculate_uptime
+from app.utils import _calculate_uptime, passwd
 
 # ----------------------------- #
 #   Module Constants            #
