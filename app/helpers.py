@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 import dateutil.parser
 import docker
 from flask import jsonify
-from numpy.random import exponential
 from sqlalchemy import and_, or_
 
 from app.models import ActivityLog, User
@@ -19,8 +18,9 @@ def generate_usage_log_data(n=100):
     _numgpus = [0, 1, 2, 3, 4]
     containers = []
 
+    users = [User(username=name) for name in _names]
     for i in range(n):
-        user = User(username=random.choice(_names))
+        user = random.choice(users)
         td_start = timedelta(days=i % 30, hours=random.randint(0, 23))
         start = datetime.utcnow() - td_start
         instance = ActivityLog(
@@ -29,7 +29,7 @@ def generate_usage_log_data(n=100):
             image_type=random.choice(_imagetypes),
             num_gpus=random.choice(_numgpus),
             start_time=start,
-            stop_time=start + timedelta(hours=exponential(8)),
+            stop_time=start + timedelta(hours=random.expovariate(0.12)),
         )
         containers.append(instance)
 
@@ -65,8 +65,8 @@ def trim_start_stop(logs, start_date, end_date):
     for log in logs:
         if log.start_time < start_date and log.stop_time > start_date:
             log.start_time = start_date
-    if log.stop_time > end_date:
-        log.stop_time = end_date
+        if log.stop_time > end_date:
+            log.stop_time = end_date
 
     return logs
 
@@ -98,7 +98,5 @@ def data_query(start_date, end_date, impute_dates=True, trim_dates=True):
         logs = impute_stop_times(logs, start_date)
     if trim_dates:
         logs = trim_start_stop(logs, start_date, end_date)
-    # TODO: implement these calculations in javascript
-    # df["runtime"] = (df.stop_time - df.start_time).dt.total_seconds() / 3600
-    # df["gpu_hours"] = df["runtime"] * df["num_gpus"]
+
     return jsonify([log.serialize for log in logs])

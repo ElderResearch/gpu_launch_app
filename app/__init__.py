@@ -33,17 +33,17 @@ def create_app():
 
 def register_extensions(server):
     from app.helpers import generate_usage_log_data
-    from app.models import ActivityLog
 
     db.init_app(server)
     with server.app_context():
         if os.getenv("FLASK_ENV") == "development" and "DATABASE_URL" not in os.environ:
             db.create_all()
-            rows = generate_usage_log_data(ActivityLog)
+            rows = generate_usage_log_data(n=100)
             db.session.add_all(rows)
             try:
                 db.session.commit()
-            except Exception:
+            except Exception as e:
+                server.logger.error(str(e))
                 db.session.rollback()
     migrate.init_app(
         server, db, directory=os.path.join(os.path.dirname(__file__), "migrations")
