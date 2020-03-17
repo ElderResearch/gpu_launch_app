@@ -5,14 +5,9 @@ from flask import flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from app import launch
-from app import db
+from app import db, FLASH_CLS
 from app.main import bp
 from app.models import ActivityLog
-
-FLASH_CLS = {
-    "error": "alert alert-danger",
-    "success": "alert alert-success",
-}
 
 
 @bp.context_processor

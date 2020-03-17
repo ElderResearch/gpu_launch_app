@@ -10,6 +10,11 @@ from flask_sqlalchemy import SQLAlchemy
 
 import config
 
+FLASH_CLS = {
+    "error": "alert alert-danger",
+    "success": "alert alert-success",
+}
+
 db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
@@ -57,7 +62,9 @@ def register_blueprints(server):
     from app.auth import bp as auth_bp
     from app.dashboard import bp as dash_bp
     from app.main import bp as main_bp
+    from app.users import bp as users_bp
 
     server.register_blueprint(auth_bp, url_prefix="/auth")
     server.register_blueprint(dash_bp, url_prefix="/dashboard")
+    server.register_blueprint(users_bp, url_prefix="/users")
     server.register_blueprint(main_bp)

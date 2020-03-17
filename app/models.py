@@ -63,6 +63,9 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return passwd_check(self.password_hash, password)
 
+    def container_count(self):
+        return self.containers.count()
+
     @property
     def serialize(self):
         """Return object data in easily serializable format"""

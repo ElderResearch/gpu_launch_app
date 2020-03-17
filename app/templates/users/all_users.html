@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="jumbotron my-3" id="welcome">
+    <h1 class="display-4">Welcome, {{ current_user.username }}!</h1>
+    <p class="lead">This is a simple application for launching custom Elder Research GPU development environments.</p>
+    <hr class="my-4">
+    <p class="lead">to view <em>all</em> usage statistics, <a href="{{ url_for('dashboard.dashboard') }}">click here</a>
+    </p>
+    <p class="lead">to view <em>my</em> usage statistics, <a
+            href="{{ url_for('users.user_page', username=current_user.username) }}">click here</a></p>
+</div>
+<div class="row">
+    {% for user in users %}
+    {% include "users/_user_card.html" %}
+    {% endfor %}
+</div>
+{% endblock %}
