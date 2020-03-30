@@ -11,3 +11,11 @@ def all_users():
     return render_template("users/all_users.html", users=users)
 
 
+@bp.route("/<username>", methods=["GET"])
+def user_page(username=None):
+    if username is None:
+        flash(message="username has not been defined.", category=FLASH_CLS["error"])
+        redirect(url_for("users.all_users"))
+
+    user = User.query.filter_by(username=request.args.get("username")).first_or_404()
+    pass
