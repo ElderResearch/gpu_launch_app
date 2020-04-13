@@ -4,6 +4,7 @@ Python:
     detach: True
     ports:
         8888: auto
+        8008: auto
 Python+R:
     image: eri_dev_p_r:{tag}
     auto_remove: true
@@ -11,6 +12,7 @@ Python+R:
     ports:
         8888: auto
         8787: auto
+        8008: auto
 Chill:
     image: chill:{tag}
     auto_remove: true

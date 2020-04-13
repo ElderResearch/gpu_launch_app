@@ -485,10 +485,10 @@ if __name__ == '__main__':
     if not args.password:
         args.password = getpass.getpass()
 
-    launch(
+    print(launch(
         username=args.username,
         password=args.password,
         imagetype=args.imagetype,
         imagetag=args.imagetag,
         num_gpus=args.numgpus
-    )
+        ))
